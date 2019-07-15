@@ -28,7 +28,7 @@ from defs import *
 import pickle
 from time import sleep
 
-address = ('localhost', 10001)
+address = ('192.168.1.114', 10001)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
