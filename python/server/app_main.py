@@ -27,7 +27,8 @@ from time import sleep
 import pickle
 
 # Application imports
-from defs import *
+sys.path.append('..')
+from common.defs import *
 import device
 import netif
 
