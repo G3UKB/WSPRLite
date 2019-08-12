@@ -28,7 +28,7 @@ import socket
 import pickle
 
 # Application imports
-from defs import *
+from common.defs import *
 
 """
 Interface to the WSPRLite client application:

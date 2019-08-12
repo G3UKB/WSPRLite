@@ -23,12 +23,53 @@
 
 # Client net interface to the WSPRLite server
 
+# Python imports
+import os, sys
+import threading
 import socket
-from defs import *
 import pickle
-from time import sleep
 
-address = ('192.168.1.114', 10001)
+# Application imports
+from common.defs import *
+
+"""
+Client Interface to the WSPRLite server application:
+
+Commands are UDP:
+    
+"""
+
+#========================================================================
+# Net interface
+class NetIFClient(threading.Thread):
+    
+    #----------------------------------------------
+    # Constructor
+    def __init__(self, callback):
+        """
+        Constructor
+        
+        Arguments:
+            callback    --  callback here when data arrives
+            
+        """
+
+        super(NetIFClient, self).__init__()
+        self.__callback = callback
+        
+        self.__sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.__sock.settimeout(3)
+        
+        self.__address = None
+        self.__terminate = False
+    
+    #----------------------------------------------
+    # Terminate
+    def terminate(self):
+        """ Terminate thread """
+        
+        self.__terminate = True
+    
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 

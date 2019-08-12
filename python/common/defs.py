@@ -28,7 +28,7 @@ RQST_IP = '0.0.0.0'
 RQST_PORT = 10001
 
 # Client connection info
-SERVER_IP = '192.168.1.115'
+SERVER_IP = '192.168.1.114'
 SERVER_PORT = 10001
 
 # Timer commands
