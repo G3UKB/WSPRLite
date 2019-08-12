@@ -23,9 +23,13 @@
 
 # Global definitions for WSPRLite application
 
-# Connection info
+# Server connection info
 RQST_IP = '0.0.0.0'
 RQST_PORT = 10001
+
+# Client connection info
+SERVER_IP = '192.168.1.115'
+SERVER_PORT = 10001
 
 # Timer commands
 WAIT_START = 0
