@@ -70,13 +70,39 @@ class NetIFClient(threading.Thread):
         
         self.__terminate = True
     
-
+    #----------------------------------------------
+    # Callsign
+    def get_callsign(self):
+        """ Return the configured callsign """
+        data, sender = data_exchange((GET_CALLSIGN,), (SERVER_IP, SERVER_PORT))
+        print(pickle.loads(data))
+    
+    #----------------------------------------------
+    # Locator
+    def get_callsign(self):
+        """ Return the configured locator """
+        data, sender = data_exchange((GET_LOCATOR,), (SERVER_IP, SERVER_PORT))
+        print(pickle.loads(data))
+    
+    #----------------------------------------------
+    # TX
+    def set_tx(self):
+        """ Set device to tx mode """
+        data, sender = data_exchange((SET_TX,), (SERVER_IP, SERVER_PORT))
+        print(pickle.loads(data))
+        
+    #----------------------------------------------
+    # Send
+    def data_exchange(self, msg, address):
+        """ Send the given message over UDP """
+        pickledData = pickle.dumps(msg)
+        sock.sendto(pickledData, address)
+        return sock.recvfrom(100)
+        
+        
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-pickledData = pickle.dumps((GET_CALLSIGN,))
-sock.sendto(pickledData, address)
-data, sender = sock.recvfrom(100)
-print(pickle.loads(data))
+
 
 pickledData = pickle.dumps((GET_LOCATOR,))
 sock.sendto(pickledData, address)
