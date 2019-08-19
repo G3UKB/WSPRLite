@@ -70,30 +70,64 @@ class NetIFClient(threading.Thread):
         
         self.__terminate = True
     
+    #=========================================================================
+    # EXTERNAL INTERFACE
+    ##=========================================================================
+    
     #----------------------------------------------
-    # Callsign
+    # Get callsign
     def get_callsign(self):
         """ Return the configured callsign """
-        data, sender = data_exchange((GET_CALLSIGN,), (SERVER_IP, SERVER_PORT))
+        data, sender = self.__data_exchange((GET_CALLSIGN,), (SERVER_IP, SERVER_PORT))
         print(pickle.loads(data))
     
     #----------------------------------------------
-    # Locator
-    def get_callsign(self):
+    # Get locator
+    def get_locator(self):
         """ Return the configured locator """
-        data, sender = data_exchange((GET_LOCATOR,), (SERVER_IP, SERVER_PORT))
+        data, sender = self.__data_exchange((GET_LOCATOR,), (SERVER_IP, SERVER_PORT))
         print(pickle.loads(data))
     
     #----------------------------------------------
-    # TX
+    # Get actual TX frequency
+    def get_freq(self):
+        """ Return the actual TX frequency in the selected band """
+        data, sender = self.__data_exchange((GET_FREQ,), (SERVER_IP, SERVER_PORT))
+        print(pickle.loads(data))
+    
+    #----------------------------------------------
+    # Set band
+    def set_band(self):
+        """ Select the band for transmission """
+        data, sender = self.__data_exchange((SET_BAND,), (SERVER_IP, SERVER_PORT))
+        print(pickle.loads(data))
+
+    #----------------------------------------------
+    # These are async messages in that the server will wait for the appropriate time
+    # to start/stop cycle. Updates are send on another |UDP channel.
+    #----------------------------------------------
+    
+    #----------------------------------------------
+    # Set TX mode
     def set_tx(self):
         """ Set device to tx mode """
-        data, sender = data_exchange((SET_TX,), (SERVER_IP, SERVER_PORT))
+        data, sender = self.__data_exchange((SET_TX,), (SERVER_IP, SERVER_PORT))
         print(pickle.loads(data))
         
     #----------------------------------------------
-    # Send
-    def data_exchange(self, msg, address):
+    # Set idle
+    def set_idle(self):
+        """ Effectively turn TX off after the next TX cycle """
+        data, sender = self.__data_exchange((SET_IDLE,), (SERVER_IP, SERVER_PORT))
+        print(pickle.loads(data))
+    
+    #=========================================================================
+    # PRIVATE
+    #=========================================================================
+    
+    #----------------------------------------------
+    # Send to device
+    def __data_exchange(self, msg, address):
         """ Send the given message over UDP """
         pickledData = pickle.dumps(msg)
         sock.sendto(pickledData, address)
