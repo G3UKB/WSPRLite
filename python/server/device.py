@@ -25,6 +25,7 @@
     Device driver for the WSPRLite WSPR transmitter.
     
     This is pretty much verbatim from the documentation to better understand the code.
+    The document is available from https://github.com/SOTAbeams/WSPRliteConfig/tree/master/techdoc/serial.md
     
     Physical connection
     =====================

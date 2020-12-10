@@ -28,6 +28,7 @@ import os, sys
 import threading
 import socket
 import pickle
+from time import sleep
 
 # Application imports
 sys.path.append('..')
@@ -148,10 +149,20 @@ sock.sendto(pickledData, address)
 data, sender = sock.recvfrom(100)
 print(pickle.loads(data))
 
-'''
+pickledData = pickle.dumps((SET_BAND, 160))
+sock.sendto(pickledData, address)
+data, sender = sock.recvfrom(100)
+print(pickle.loads(data))
+
+pickledData = pickle.dumps((GET_FREQ,))
+sock.sendto(pickledData, address)
+data, sender = sock.recvfrom(100)
+print(pickle.loads(data))
+
 pickledData = pickle.dumps((SET_TX,))
 sock.sendto(pickledData, address)
 resp = sock.recvfrom(100)
+print(resp)
 if resp == None:
     while True:
         resp = sock.recvfrom(100)
@@ -176,4 +187,4 @@ if resp == None:
             print("Waiting response to SET_IDLE...")
             sleep(10)    
 print(pickle.loads(resp[0]))
-'''
+
