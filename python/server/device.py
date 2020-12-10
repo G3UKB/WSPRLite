@@ -234,8 +234,8 @@ from enum import Enum, auto
 from time import sleep
 
 # Application imports
-#from defs import *
-import timer
+sys.path.append('..')
+from common.defs import *
 import freq_table
 
 #========================================================================

@@ -30,6 +30,7 @@ import socket
 import pickle
 
 # Application imports
+sys.path.append('..')
 from common.defs import *
 
 """
@@ -146,6 +147,7 @@ sock.sendto(pickledData, address)
 data, sender = sock.recvfrom(100)
 print(pickle.loads(data))
 
+'''
 pickledData = pickle.dumps((SET_TX,))
 sock.sendto(pickledData, address)
 resp = sock.recvfrom(100)
@@ -173,4 +175,4 @@ if resp == None:
             print("Waiting response to SET_IDLE...")
             sleep(10)    
 print(pickle.loads(resp[0]))
-
+'''

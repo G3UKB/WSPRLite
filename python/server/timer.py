@@ -38,7 +38,8 @@ import queue
 from time import sleep
 
 # Application imports
-#from defs import *
+sys.path.append('..')
+from common.defs import *
 
 #========================================================================
 """
