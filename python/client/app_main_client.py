@@ -22,5 +22,29 @@
 #
 
 """
-Client program for the WSPRLite server application.
+Main program for the WSPRLite client application.
 """
+# All imports
+from imports import *
+
+# App imports
+import ui_client
+
+#======================================================================================================================
+# Main code
+def main():
+    
+    try:
+        # The one and only QApplication 
+        qt_app = QApplication(sys.argv)
+        # Create instance
+        ui = ui_client.UIClient(qt_app)
+        # Run application loop
+        sys.exit(ui.run())
+        
+    except Exception as e:
+        print ('Exception [%s][%s]' % (str(e), traceback.format_exc()))
+ 
+# Entry point       
+if __name__ == '__main__':
+    main()
