@@ -234,7 +234,7 @@ from enum import Enum, auto
 from time import sleep
 
 # Application imports
-from defs import *
+#from defs import *
 import timer
 import freq_table
 

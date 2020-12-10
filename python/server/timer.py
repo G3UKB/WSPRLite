@@ -38,7 +38,7 @@ import queue
 from time import sleep
 
 # Application imports
-from defs import *
+#from defs import *
 
 #========================================================================
 """
