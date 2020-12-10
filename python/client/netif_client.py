@@ -136,6 +136,7 @@ class NetIFClient(threading.Thread):
         
         
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+address = (SERVER_IP, SERVER_PORT)
 
 pickledData = pickle.dumps((GET_LOCATOR,))
 sock.sendto(pickledData, address)

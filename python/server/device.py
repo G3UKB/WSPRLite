@@ -237,6 +237,7 @@ from time import sleep
 sys.path.append('..')
 from common.defs import *
 import freq_table
+import timer
 
 #========================================================================
 # Enumerations transferred from the C++ Config program
