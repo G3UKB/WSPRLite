@@ -159,11 +159,12 @@ class UIClient(QMainWindow):
     def __freq(self, ):
         s = self.wfreqtoset.text()
         f = ''
-        for i in range(0, len(s)-1):
+        for i in range(0, len(s)):
             if s[i] != '.':
-                f.append(s[i])
+                f = f + (s[i])
         f = float(f)/1000000.0
-        band = find_band(freq)
+        upper, lower, band = find_band(f)
+        print(band)
         if band == None:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
@@ -178,7 +179,7 @@ class UIClient(QMainWindow):
                 # Set lite
                 self.__netq.append((SET_FREQ, f))
                 # Set the band in drop down but dont send else freq will be reset
-                index = self.wband.findText(band, QtCore.Qt.MatchFixedString)
+                index = self.wband.findText(str(band), Qt.MatchFixedString)
                 if index >= 0:
                     self.wband.setCurrentIndex(index)
                     # Set LPF filter

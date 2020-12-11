@@ -49,6 +49,7 @@ def find_band(freq):
     for band in band_lookup.keys():
         lower = band_lookup[band][0]
         upper = band_lookup[band][1]
+        print(freq, lower, upper)
         if freq >= lower and freq <= upper:
             return lower, upper, band
     return None
