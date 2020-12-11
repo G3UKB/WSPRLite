@@ -2,9 +2,9 @@
 #
 # webrelay.py
 #
-# Toggle a relay in any relay system that uses webrelay
+# Set relays for a given band
 # 
-# Copyright (C) 2019 by G3UKB Bob Cowdery
+# Copyright (C) 2020 by G3UKB Bob Cowdery
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -24,13 +24,34 @@
 #
 
 # All imports
-from main.imports import *
+from imports import *
 
+# Band to channel number
+band_lookup = {
+    160 : 0,
+    80 : 1,
+    40 : 2,
+    20 : 3,
+    15 : 4,
+    10 : 5
+}
+
+#-------------------------------------------------
+# Set the channel for the given band, first resetting all channels
+# such that only the target LPF is selected.
+def set_lpf(ip, port, band):
+    on_ch = band_lookup[band]
+    # Turn all channels off first
+    for ch in range(6):
+        set_web_relays(ip, port, ch, 'off')
+    # Set the target channel
+    set_web_relays(ip, port, on_ch, 'on')
+    
 #-------------------------------------------------
 # This uses the webrelay_min.py Cherrypy server.
 # Its only function is to set/reset relays.
 # For the full interface use webrelay.py and a browser client.
-# Note sequencer uses 1-n but lower level uses 0-(n-1)
-def set_web_relay(ip, port, relay, state):
-    urllib.request.urlopen('http://%s:%d/set_relay?relay=%d;state=%s' % (ip, port, relay-1, state))
+# Note that the minimal web relay app requires channels to be zero based
+def set_web_relays(ip, port, relay, state):
+    urllib.request.urlopen('http://%s:%d/set_channel?relay=%d;state=%s' % (ip, port, relay, state))
     

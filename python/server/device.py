@@ -237,7 +237,7 @@ from time import sleep
 # Application imports
 sys.path.append('..')
 from common.defs import *
-import freq_table
+from common import freq_table
 import timer
 
 #========================================================================

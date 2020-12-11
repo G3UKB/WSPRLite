@@ -90,6 +90,7 @@ class NetIFClient(threading.Thread):
             while len(self.__q) > 0:
                 cmd, args = self.__q.popleft()
                 self.__dispatch[cmd](args)
+            sleep(0.1)
             
         print ("WSPRLite Automation - Net thread exiting...")
         

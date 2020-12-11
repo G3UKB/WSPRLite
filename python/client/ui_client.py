@@ -27,7 +27,9 @@ from imports import *
 # Application imports
 sys.path.append('..')
 from common.defs import *
+from common.freq_table import *
 import netif_client as netif
+import webrelay
 
 """
 UI for the WSPRLite client application.
@@ -122,7 +124,7 @@ class UIClient(QMainWindow):
         lband = QLabel("Band")
         self.__grid.addWidget(lband, 4, 0)
         self.wband = QComboBox()
-        self.wband.addItems(['160','80','40','20','15', '10'])
+        self.wband.addItems(BANDS_AVAILABLE)
         self.__grid.addWidget(self.wband, 4, 1)
         self.bbandset = QPushButton('Set')
         self.__grid.addWidget(self.bbandset, 4, 2)
@@ -161,12 +163,43 @@ class UIClient(QMainWindow):
             if s[i] != '.':
                 f.append(s[i])
         f = float(f)/1000000.0
-        self.__netq.append((SET_FREQ, f))             
+        band = find_band(freq)
+        if band == None:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Invalid frequency!")
+            msg.setInformativeText("Please select a frequency within the bands you have LPF's available")
+            msg.setWindowTitle("Info")
+            msg.setDetailedText(get_band_limits())
+            msg.setStandardButtons(QMessageBox.Ok)
+            retval = msg.exec_()
+        else:
+            if str(band) in BANDS_AVAILABLE:
+                # Set lite
+                self.__netq.append((SET_FREQ, f))
+                # Set the band in drop down but dont send else freq will be reset
+                index = self.wband.findText(band, QtCore.Qt.MatchFixedString)
+                if index >= 0:
+                    self.wband.setCurrentIndex(index)
+                    # Set LPF filter
+                    webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
+            else:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Invalid band!")
+                msg.setInformativeText("Please select a frequency within the bands you have LPF's available")
+                msg.setWindowTitle("Info")
+                msg.setDetailedText(get_band_limits())
+                msg.setStandardButtons(QMessageBox.Ok)
+                retval = msg.exec_()
         
     # ------------------------------------------------------
     # Band change
     def __band(self, ):
-        self.__netq.append((SET_BAND, int(self.wband.currentText()))) 
+        band = int(self.wband.currentText())
+        self.__netq.append((SET_BAND, band))
+        # Set LPF filter
+        webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
     
     #========================================================================================
     # Idle time processing 
@@ -200,5 +233,7 @@ class UIClient(QMainWindow):
             elif cmd == GET_LOCATOR:
                 self.__liteLocator = result
             elif cmd == GET_FREQ:
+                self.__liteFreq = str(result)
+            elif cmd == SET_BAND:
                 self.__liteFreq = str(result)
         
