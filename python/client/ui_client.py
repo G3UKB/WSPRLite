@@ -50,11 +50,17 @@ class UIClient(QMainWindow):
         palette.setColor(QPalette.Background,QColor(195,195,195,255))
         self.setPalette(palette)
         
-        # Create the net interface
-        self.net = netif.NetIFClient()
+        # Create the net interface and a q to dispatch to
+        self.__netq = deque()
+        self.net = netif.NetIFClient(self.__netq, self.__netCallback)
         
         # Initialise the GUI
         self.initUI()
+        
+        # Init fields
+        self.__netq.append(GET_CALLSIGN)
+        self.__netq.append(GET_LOCATOR)
+        self.__netq.append(GET_FREQ)
         
         # Show the GUI
         self.show()
@@ -122,7 +128,6 @@ class UIClient(QMainWindow):
     # ------------------------------------------------------
     # Run the application
     def run(self, ):
-        
         # Returns when application exists
         print("WSPRLite Automation Client running...")
         return self.__qt_app.exec_()
@@ -145,6 +150,6 @@ class UIClient(QMainWindow):
     
     # ------------------------------------------------------
     # Callback from net interface
-    def __net_callback(self, data):
+    def __netCallback(self, data):
         print(data)
         

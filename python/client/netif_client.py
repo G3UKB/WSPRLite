@@ -23,12 +23,8 @@
 
 # Client net interface to the WSPRLite server
 
-# Python imports
-import os, sys
-import threading
-import socket
-import pickle
-from time import sleep
+# All imports
+from imports import *
 
 # Application imports
 sys.path.append('..')
@@ -47,23 +43,35 @@ class NetIFClient(threading.Thread):
     
     #----------------------------------------------
     # Constructor
-    def __init__(self, callback):
+    def __init__(self, q, callback):
         """
         Constructor
         
         Arguments:
+            q           --  queue on which requests are posted
             callback    --  callback here when data arrives
             
         """
 
         super(NetIFClient, self).__init__()
         self.__callback = callback
+        self.__q = q
         
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.__sock.settimeout(3)
         
-        self.__address = None
+        self.__address = (SERVER_IP, SERVER_PORT)
         self.__terminate = False
+        
+        self.__dispatch = {
+            GET_CALLSIGN : self.get_callsign,
+            GET_LOCATOR : self.__get_locator,
+            GET_FREQ : self.__get_freq,
+            SET_FREQ : self.__set_freq,
+            SET_BAND : self.__set_band,
+            SET_TX : self.__set_tx,
+            SET_IDLE : self.__set_idle
+        }
     
     #----------------------------------------------
     # Terminate
@@ -72,37 +80,57 @@ class NetIFClient(threading.Thread):
         
         self.__terminate = True
     
+    #-------------------------------------------------
+    # Thread entry point    
+    def run(self):
+        """ Listen for events """
+
+        # Processing loop
+        while not self.__terminate:
+            while len(self.__q) > 0:
+                cmd, args = self.__q.popleft()
+                self.__dispatch[cmd](args)
+            
+        print ("Serial Client - Reader thread exiting...")
+        
     #=========================================================================
-    # EXTERNAL INTERFACE
-    ##=========================================================================
+    # Command Execution
+    #=========================================================================
     
     #----------------------------------------------
     # Get callsign
-    def get_callsign(self):
+    def __get_callsign(self):
         """ Return the configured callsign """
-        data, sender = self.__data_exchange((GET_CALLSIGN,), (SERVER_IP, SERVER_PORT))
-        print(pickle.loads(data))
+        data, sender = self.__data_exchange((GET_CALLSIGN,), self.__address)
+        self.__callback((GET_CALLSIGN, pickle.loads(data)))
     
     #----------------------------------------------
     # Get locator
-    def get_locator(self):
+    def __get_locator(self):
         """ Return the configured locator """
-        data, sender = self.__data_exchange((GET_LOCATOR,), (SERVER_IP, SERVER_PORT))
-        print(pickle.loads(data))
+        data, sender = self.__data_exchange((GET_LOCATOR,), self.__address)
+        self.__callback((GET_LOCATOR, pickle.loads(data)))
     
     #----------------------------------------------
     # Get actual TX frequency
-    def get_freq(self):
+    def __get_freq(self):
         """ Return the actual TX frequency in the selected band """
-        data, sender = self.__data_exchange((GET_FREQ,), (SERVER_IP, SERVER_PORT))
-        print(pickle.loads(data))
+        data, sender = self.__data_exchange((GET_FREQ,), self.__address)
+        self.__callback((GET_FREQ, pickle.loads(data)))
+    
+    #----------------------------------------------
+    # Set TX frequency
+    def __set_freq(self, freq):
+        """ Sets the TX frequency """
+        data, sender = self.__data_exchange((SET_FREQ, freq), self.__address)
+        self.__callback((SET_FREQ, pickle.loads(data)))
     
     #----------------------------------------------
     # Set band
-    def set_band(self):
+    def __set_band(self, band):
         """ Select the band for transmission """
-        data, sender = self.__data_exchange((SET_BAND,), (SERVER_IP, SERVER_PORT))
-        print(pickle.loads(data))
+        data, sender = self.__data_exchange((SET_BAND, band), self.__address)
+        self.__callback((SET_BAND, pickle.loads(data)))
 
     #----------------------------------------------
     # These are async messages in that the server will wait for the appropriate time
@@ -111,21 +139,17 @@ class NetIFClient(threading.Thread):
     
     #----------------------------------------------
     # Set TX mode
-    def set_tx(self):
+    def __set_tx(self):
         """ Set device to tx mode """
-        data, sender = self.__data_exchange((SET_TX,), (SERVER_IP, SERVER_PORT))
-        print(pickle.loads(data))
+        data, sender = self.__data_exchange((SET_TX,), self.__address)
+        self.__callback((SET_TX, pickle.loads(data)))
         
     #----------------------------------------------
     # Set idle
-    def set_idle(self):
+    def __set_idle(self):
         """ Effectively turn TX off after the next TX cycle """
-        data, sender = self.__data_exchange((SET_IDLE,), (SERVER_IP, SERVER_PORT))
-        print(pickle.loads(data))
-    
-    #=========================================================================
-    # PRIVATE
-    #=========================================================================
+        data, sender = self.__data_exchange((SET_IDLE,), self.__address)
+        self.__callback((SET_IDLE, pickle.loads(data)))
     
     #----------------------------------------------
     # Send to device
@@ -135,7 +159,7 @@ class NetIFClient(threading.Thread):
         sock.sendto(pickledData, address)
         return sock.recvfrom(100)
         
-        
+'''        
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 address = (SERVER_IP, SERVER_PORT)
 
@@ -187,4 +211,4 @@ if resp == None:
             print("Waiting response to SET_IDLE...")
             sleep(10)    
 print(pickle.loads(resp[0]))
-
+'''
