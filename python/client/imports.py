@@ -29,7 +29,7 @@ import os,sys
 import traceback
 import socket
 import pickle
-import deque
+from collections import deque
 from time import sleep
 import threading
 import pprint

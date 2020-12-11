@@ -64,7 +64,7 @@ class NetIFClient(threading.Thread):
         self.__terminate = False
         
         self.__dispatch = {
-            GET_CALLSIGN : self.get_callsign,
+            GET_CALLSIGN : self.__get_callsign,
             GET_LOCATOR : self.__get_locator,
             GET_FREQ : self.__get_freq,
             SET_FREQ : self.__set_freq,
@@ -91,7 +91,7 @@ class NetIFClient(threading.Thread):
                 cmd, args = self.__q.popleft()
                 self.__dispatch[cmd](args)
             
-        print ("Serial Client - Reader thread exiting...")
+        print ("WSPRLite Automation - Net thread exiting...")
         
     #=========================================================================
     # Command Execution
@@ -99,38 +99,53 @@ class NetIFClient(threading.Thread):
     
     #----------------------------------------------
     # Get callsign
-    def __get_callsign(self):
+    def __get_callsign(self, p):
         """ Return the configured callsign """
-        data, sender = self.__data_exchange((GET_CALLSIGN,), self.__address)
-        self.__callback((GET_CALLSIGN, pickle.loads(data)))
+        r, data = self.__data_exchange((GET_CALLSIGN,), self.__address)
+        if r:
+            self.__callback((GET_CALLSIGN, pickle.loads(data)))
+        else:
+            self.__callback((GET_CALLSIGN, (False, data)))
     
     #----------------------------------------------
     # Get locator
-    def __get_locator(self):
+    def __get_locator(self, p):
         """ Return the configured locator """
-        data, sender = self.__data_exchange((GET_LOCATOR,), self.__address)
-        self.__callback((GET_LOCATOR, pickle.loads(data)))
-    
+        r, data = self.__data_exchange((GET_LOCATOR,), self.__address)
+        if r:
+            self.__callback((GET_LOCATOR, pickle.loads(data)))
+        else:
+            self.__callback((GET_LOCATOR, (False, data)))
+            
     #----------------------------------------------
     # Get actual TX frequency
-    def __get_freq(self):
+    def __get_freq(self, p):
         """ Return the actual TX frequency in the selected band """
-        data, sender = self.__data_exchange((GET_FREQ,), self.__address)
-        self.__callback((GET_FREQ, pickle.loads(data)))
-    
+        r, data = self.__data_exchange((GET_FREQ,), self.__address)
+        if r:
+            self.__callback((GET_FREQ, pickle.loads(data)))
+        else:
+            self.__callback((GET_FREQ, (False, data)))
+            
     #----------------------------------------------
     # Set TX frequency
     def __set_freq(self, freq):
         """ Sets the TX frequency """
-        data, sender = self.__data_exchange((SET_FREQ, freq), self.__address)
-        self.__callback((SET_FREQ, pickle.loads(data)))
-    
+        r, data = self.__data_exchange((SET_FREQ, freq), self.__address)
+        if r:
+            self.__callback((SET_FREQ, pickle.loads(data)))
+        else:
+            self.__callback((SET_FREQ, (False, data)))
+            
     #----------------------------------------------
     # Set band
     def __set_band(self, band):
         """ Select the band for transmission """
-        data, sender = self.__data_exchange((SET_BAND, band), self.__address)
-        self.__callback((SET_BAND, pickle.loads(data)))
+        r, data = self.__data_exchange((SET_BAND, band), self.__address)
+        if r:
+            self.__callback((SET_BAND, pickle.loads(data)))
+        else:
+            self.__callback((SET_BAND, (False, data)))
 
     #----------------------------------------------
     # These are async messages in that the server will wait for the appropriate time
@@ -141,23 +156,33 @@ class NetIFClient(threading.Thread):
     # Set TX mode
     def __set_tx(self):
         """ Set device to tx mode """
-        data, sender = self.__data_exchange((SET_TX,), self.__address)
-        self.__callback((SET_TX, pickle.loads(data)))
+        r, data = self.__data_exchange((SET_TX,), self.__address)
+        if r:
+            self.__callback((SET_TX, pickle.loads(data)))
+        else:
+            self.__callback((SET_TX, (False, data)))
         
     #----------------------------------------------
     # Set idle
     def __set_idle(self):
         """ Effectively turn TX off after the next TX cycle """
-        data, sender = self.__data_exchange((SET_IDLE,), self.__address)
-        self.__callback((SET_IDLE, pickle.loads(data)))
+        r, data = self.__data_exchange((SET_IDLE,), self.__address)
+        if r:
+            self.__callback((SET_IDLE, pickle.loads(data)))
+        else:
+            self.__callback((SET_IDLE, (False, data)))
     
     #----------------------------------------------
     # Send to device
     def __data_exchange(self, msg, address):
         """ Send the given message over UDP """
         pickledData = pickle.dumps(msg)
-        sock.sendto(pickledData, address)
-        return sock.recvfrom(100)
+        try:
+            self.__sock.sendto(pickledData, address)
+            data, addr = self.__sock.recvfrom(100)
+            return (True, data)
+        except socket.timeout:
+            return False, "Timeout on read!"
         
 '''        
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

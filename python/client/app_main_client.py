@@ -40,7 +40,11 @@ def main():
         # Create instance
         ui = ui_client.UIClient(qt_app)
         # Run application loop
-        sys.exit(ui.run())
+        r = ui.run()
+        print("WSPRLite Automation Client closing...")
+        # UI closing
+        ui.terminate()
+        sys.exit(r)
         
     except Exception as e:
         print ('Exception [%s][%s]' % (str(e), traceback.format_exc()))

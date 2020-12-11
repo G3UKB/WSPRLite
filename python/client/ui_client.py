@@ -25,6 +25,8 @@
 from imports import *
 
 # Application imports
+sys.path.append('..')
+from common.defs import *
 import netif_client as netif
 
 """
@@ -45,6 +47,11 @@ class UIClient(QMainWindow):
         
         self.__qt_app = qt_app
         
+        # Class vars
+        self.__liteCallsign = ''
+        self.__liteLocator = ''
+        self.__liteFreq = ''
+        
         # Set the back colour
         palette = QPalette()
         palette.setColor(QPalette.Background,QColor(195,195,195,255))
@@ -52,19 +59,23 @@ class UIClient(QMainWindow):
         
         # Create the net interface and a q to dispatch to
         self.__netq = deque()
-        self.net = netif.NetIFClient(self.__netq, self.__netCallback)
+        self.__net = netif.NetIFClient(self.__netq, self.__netCallback)
+        self.__net.start()
         
         # Initialise the GUI
         self.initUI()
         
         # Init fields
-        self.__netq.append(GET_CALLSIGN)
-        self.__netq.append(GET_LOCATOR)
-        self.__netq.append(GET_FREQ)
+        self.__netq.append((GET_CALLSIGN, None))
+        self.__netq.append((GET_LOCATOR, None))
+        self.__netq.append((GET_FREQ, None))
         
         # Show the GUI
         self.show()
         self.repaint()
+        
+        # Set a timer
+        QTimer.singleShot(IDLE_TICKER, self.__idleProcessing)
     
     # =====================================================================
     # UI initialisation and window event handlers
@@ -96,8 +107,8 @@ class UIClient(QMainWindow):
         
         lfreqget = QLabel("Current Freq")
         self.__grid.addWidget(lfreqget, 2, 0)
-        wfreqget = QLabel("")
-        self.__grid.addWidget(wfreqget, 2, 1)
+        self.wfreqget = QLabel("")
+        self.__grid.addWidget(self.wfreqget, 2, 1)
         
         lfreqset = QLabel("Set Freq")
         self.__grid.addWidget(lfreqset, 3, 0)
@@ -132,18 +143,46 @@ class UIClient(QMainWindow):
         print("WSPRLite Automation Client running...")
         return self.__qt_app.exec_()
     
+    # ------------------------------------------------------
+    # Terminate the application
+    def terminate(self, ):
+        self.__net.terminate()
+        self.__net.join()
+        
     # =====================================================================
     # UI Events
     
     # ------------------------------------------------------
     # Freq change
     def __freq(self, ):
-        print ("Freq ", self.wfreqtoset.text())
+        s = self.wfreqtoset.text()
+        f = ''
+        for i in range(0, len(s)-1):
+            if s[i] != '.':
+                f.append(s[i])
+        f = float(f)/1000000.0
+        self.__netq.append((SET_FREQ, f))             
         
     # ------------------------------------------------------
     # Band change
     def __band(self, ):
-        print ("Band ", self.wband.currentText())
+        self.__netq.append((SET_BAND, int(self.wband.currentText()))) 
+    
+    #========================================================================================
+    # Idle time processing 
+    def __idleProcessing(self):
+        
+        """
+        Idle processing.
+        Called every 100ms single shot
+        
+        """
+        self.wcallsign.setText(self.__liteCallsign)
+        self.wlocator.setText(self.__liteLocator)
+        self.wfreqget.setText(self.__liteFreq)
+        
+        # Set next tick
+        QTimer.singleShot(IDLE_TICKER, self.__idleProcessing)
         
     # =====================================================================
     # Callbacks
@@ -151,5 +190,15 @@ class UIClient(QMainWindow):
     # ------------------------------------------------------
     # Callback from net interface
     def __netCallback(self, data):
-        print(data)
+        cmd = data[0]
+        flag = data[1][0]
+        result = data[1][1]
+        
+        if flag:
+            if cmd == GET_CALLSIGN:
+                self.__liteCallsign = result
+            elif cmd == GET_LOCATOR:
+                self.__liteLocator = result
+            elif cmd == GET_FREQ:
+                self.__liteFreq = str(result)
         
