@@ -133,7 +133,7 @@ class TimerThrd (threading.Thread):
         
         while not self.__terminate:
             dt = datetime.datetime.utcnow()
-            if dt.second >= 51:
+            if dt.second >= 55:
                 if dt.minute%2 != 0:
                     # We are at least 110.6s from the start time
                     # Any transmission should be finished

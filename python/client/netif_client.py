@@ -150,12 +150,12 @@ class NetIFClient(threading.Thread):
 
     #----------------------------------------------
     # These are async messages in that the server will wait for the appropriate time
-    # to start/stop cycle. Updates are send on another |UDP channel.
+    # to start/stop the cycle. Updates are sent on another UDP channel.
     #----------------------------------------------
     
     #----------------------------------------------
     # Set TX mode
-    def __set_tx(self):
+    def __set_tx(self, p):
         """ Set device to tx mode """
         r, data = self.__data_exchange((SET_TX,), self.__address)
         if r:
@@ -165,7 +165,7 @@ class NetIFClient(threading.Thread):
         
     #----------------------------------------------
     # Set idle
-    def __set_idle(self):
+    def __set_idle(self, p):
         """ Effectively turn TX off after the next TX cycle """
         r, data = self.__data_exchange((SET_IDLE,), self.__address)
         if r:

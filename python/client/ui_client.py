@@ -133,13 +133,14 @@ class UIClient(QMainWindow):
         self.__grid.addWidget(self.bbandset, 4, 2)
         self.bbandset.clicked.connect(self.__band)
         
-        lcycles = QLabel("Cycles")
-        self.__grid.addWidget(lcycles, 5, 0)
-        self.wcycles = QSpinBox()
-        self.wcycles.setRange(0, 10)
-        self.__grid.addWidget(self.wcycles, 5, 1)
-        self.wcyclesset = QPushButton('TX')
-        self.__grid.addWidget(self.wcyclesset, 5, 2)
+        ltx = QLabel("TX")
+        self.__grid.addWidget(ltx, 5, 0)
+        self.btxon = QPushButton('Start')
+        self.__grid.addWidget(self.btxon, 5, 1)
+        self.btxon.clicked.connect(self.__start)
+        self.btxoff = QPushButton('Stop')
+        self.__grid.addWidget(self.btxoff, 5, 2)
+        self.btxoff.clicked.connect(self.__stop)
     
     # ------------------------------------------------------
     # Run the application
@@ -205,6 +206,14 @@ class UIClient(QMainWindow):
         # Set LPF filter
         webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
     
+    # ------------------------------------------------------
+    # TX Control
+    def __start(self, ):
+        self.__netq.append((SET_TX, None))
+    
+    def __stop(self, ):
+        self.__netq.append((SET_IDLE, None))
+        
     #========================================================================================
     # Idle time processing 
     def __idleProcessing(self):
