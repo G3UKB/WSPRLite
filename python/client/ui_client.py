@@ -100,16 +100,19 @@ class UIClient(QMainWindow):
         lcallsign = QLabel("Callsign")
         self.__grid.addWidget(lcallsign, 0, 0)
         self.wcallsign = QLabel("")
+        self.wcallsign.setStyleSheet("color: green; font: 16px")
         self.__grid.addWidget(self.wcallsign, 0, 1)
         
         llocator = QLabel("Locator")
         self.__grid.addWidget(llocator, 1, 0)
         self.wlocator = QLabel("")
+        self.wlocator.setStyleSheet("color: green; font: 16px")
         self.__grid.addWidget(self.wlocator, 1, 1)
         
         lfreqget = QLabel("Current Freq")
         self.__grid.addWidget(lfreqget, 2, 0)
         self.wfreqget = QLabel("")
+        self.wfreqget.setStyleSheet("color: red; font: 16px")
         self.__grid.addWidget(self.wfreqget, 2, 1)
         
         lfreqset = QLabel("Set Freq")
@@ -213,7 +216,7 @@ class UIClient(QMainWindow):
         """
         self.wcallsign.setText(self.__liteCallsign)
         self.wlocator.setText(self.__liteLocator)
-        self.wfreqget.setText(self.__liteFreq)
+        self.wfreqget.setText(str(float(self.__liteFreq)/1000000.0))
         
         # Set next tick
         QTimer.singleShot(IDLE_TICKER, self.__idleProcessing)
