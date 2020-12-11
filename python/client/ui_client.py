@@ -24,6 +24,9 @@
 # All imports
 from imports import *
 
+# Application imports
+import netif_client as netif
+
 """
 UI for the WSPRLite client application.
 """
@@ -46,6 +49,9 @@ class UIClient(QMainWindow):
         palette = QPalette()
         palette.setColor(QPalette.Background,QColor(195,195,195,255))
         self.setPalette(palette)
+        
+        # Create the net interface
+        self.net = netif.NetIFClient()
         
         # Initialise the GUI
         self.initUI()
@@ -82,33 +88,63 @@ class UIClient(QMainWindow):
         self.wlocator = QLabel("")
         self.__grid.addWidget(self.wlocator, 1, 1)
         
-        lfreq = QLabel("Freq")
-        self.__grid.addWidget(lfreq, 2, 0)
-        self.wfreq = QLineEdit('000.000.000')
-        self.wfreq.setInputMask('999.999.999')
-        self.__grid.addWidget(self.wfreq, 2, 1)
-        self.wfreqset = QPushButton('Set')
-        self.__grid.addWidget(self.wfreqset, 2, 2)
+        lfreqget = QLabel("Current Freq")
+        self.__grid.addWidget(lfreqget, 2, 0)
+        wfreqget = QLabel("")
+        self.__grid.addWidget(wfreqget, 2, 1)
+        
+        lfreqset = QLabel("Set Freq")
+        self.__grid.addWidget(lfreqset, 3, 0)
+        self.wfreqtoset = QLineEdit('000.000.000')
+        self.wfreqtoset.setInputMask('999.999.999')
+        self.__grid.addWidget(self.wfreqtoset, 3, 1)
+        self.bfreqset = QPushButton('Set')
+        self.__grid.addWidget(self.bfreqset, 3, 2)
+        self.bfreqset.clicked.connect(self.__freq)
         
         lband = QLabel("Band")
-        self.__grid.addWidget(lband, 3, 0)
+        self.__grid.addWidget(lband, 4, 0)
         self.wband = QComboBox()
         self.wband.addItems(['160','80','40','20','15', '10'])
-        self.__grid.addWidget(self.wband, 3, 1)
-        self.wbandset = QPushButton('Set')
-        self.__grid.addWidget(self.wbandset, 3, 2)
+        self.__grid.addWidget(self.wband, 4, 1)
+        self.bbandset = QPushButton('Set')
+        self.__grid.addWidget(self.bbandset, 4, 2)
+        self.bbandset.clicked.connect(self.__band)
         
         lcycles = QLabel("Cycles")
-        self.__grid.addWidget(lcycles, 4, 0)
+        self.__grid.addWidget(lcycles, 5, 0)
         self.wcycles = QSpinBox()
         self.wcycles.setRange(0, 10)
-        self.__grid.addWidget(self.wcycles, 4, 1)
+        self.__grid.addWidget(self.wcycles, 5, 1)
         self.wcyclesset = QPushButton('TX')
-        self.__grid.addWidget(self.wcyclesset, 4, 2)
+        self.__grid.addWidget(self.wcyclesset, 5, 2)
     
+    # ------------------------------------------------------
+    # Run the application
     def run(self, ):
-        """ Run the application """
         
         # Returns when application exists
         print("WSPRLite Automation Client running...")
-        return self.__qt_app.exec_()    
+        return self.__qt_app.exec_()
+    
+    # =====================================================================
+    # UI Events
+    
+    # ------------------------------------------------------
+    # Freq change
+    def __freq(self, ):
+        print ("Freq ", self.wfreqtoset.text())
+        
+    # ------------------------------------------------------
+    # Band change
+    def __band(self, ):
+        print ("Band ", self.wband.currentText())
+        
+    # =====================================================================
+    # Callbacks
+    
+    # ------------------------------------------------------
+    # Callback from net interface
+    def __net_callback(self, data):
+        print(data)
+        
