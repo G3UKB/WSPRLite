@@ -103,10 +103,10 @@ class WSPRLiteMain:
                     self.__netif.response(self.__lite.set_band(request[1])) 
             elif type == SET_TX:
                 print("Received: SET_TX")
-                self.__lite.set_tx()
+                self.__netif.response(self.__lite.set_tx())
             elif type == SET_IDLE:
                 print("Received: SET_IDLE")
-                self.__lite.set_idle()
+                self.__netif.response(self.__lite.set_idle())
             elif type == GET_STATUS:
                 print("Received: GET_STATUS")
                 self.__netif.response(self.__lite.get_status())

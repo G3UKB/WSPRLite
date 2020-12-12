@@ -442,6 +442,7 @@ class WSPRLite(object):
         self.__status = WAIT_START
         print("Waiting for even minute to start TX...")
         self.__timer.wait_start()
+        self.__m_start_cb((True, ''))
 
     #----------------------------------------------
     # Stop transmitting
@@ -454,6 +455,7 @@ class WSPRLite(object):
         self.__status = WAIT_STOP
         print("Waiting for just before next even minute to stop TX...")
         self.__timer.wait_stop()
+        self.__m_stop_cb((True, ''))
     
     #----------------------------------------------
     # Get TX status
@@ -575,7 +577,7 @@ class WSPRLite(object):
         # Complete the TX message at correct start time
         self.__ser.write(self.__set_tx_msg)
         self.__do_response(DeviceMode.WSPR_Active)
-        self.__m_start_cb(self.__reply)
+        print("Delayed response from start TX: ", self.__reply)
         self.__status = TX_CYCLING
         print("Starting TX cycling...")
     
@@ -584,9 +586,9 @@ class WSPRLite(object):
         # Complete the reset message during transmission window
         self.__ser.write(self.__idle_msg)
         self.__do_response(MsgType.Reset)
-        self.__m_stop_cb(self.__reply)
-        print("Stopped TX cycling...")
+        print("Delayed response from stop TX: ", self.__reply)
         self.__status = IDLE
+        print("Stopped TX cycling...")
         
 #========================================================================
 # Module Test       

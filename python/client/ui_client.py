@@ -241,7 +241,7 @@ class UIClient(QMainWindow):
     # ------------------------------------------------------
     # TX Control
     def __run(self, ):
-        if self.btx.isChecked:
+        if self.btx.isChecked():
             self.__netq.append((SET_TX, None))
             self.btx.setText("Stop")
             self.btx.setStyleSheet("color: red; font: 14px")
@@ -332,7 +332,7 @@ class UIClient(QMainWindow):
         cmd = data[0]
         flag = data[1][0]
         result = data[1][1]
-        
+        print(cmd, flag, result)
         if flag:
             self.__connected = True
             if cmd == GET_CALLSIGN:
