@@ -312,12 +312,12 @@ class UIClient(QMainWindow):
         self.btime.setText(time.strftime("%H"+":"+"%M"+":"+"%S"))
         
         # Update TX status
-        self.ltxstate.setText(self.__txstate)
-        if self.__txstate == IDLE:
+        self.ltxstate.setText(self.__txstatus)
+        if self.__txstatus == IDLE:
             self.ltxstate.setStyleSheet("color: green; font: 14px")
-        elif self.__txstate == WAIT_START or self.__txstate == WAIT_STOP:
+        elif self.__txstatus == WAIT_START or self.__txstatus == WAIT_STOP:
             self.ltxstate.setStyleSheet("color: amber; font: 14px")
-        elif self.__txstate == TX_CYCLING:
+        elif self.__txstatus == TX_CYCLING:
             self.ltxstate.setStyleSheet("color: red; font: 14px")
         
         # Set next tick

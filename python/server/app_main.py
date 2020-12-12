@@ -81,26 +81,34 @@ class WSPRLiteMain:
             # request is an array of type followed by one or more parameters
             type = request[0]
             if type == GET_CALLSIGN:
+                print("Received: GET_CALLSIGN")
                 self.__netif.response(self.__lite.get_callsign())
             elif type == GET_LOCATOR:
+                print("Received: GET_LOCATOR")
                 self.__netif.response(self.__lite.get_locator())
             elif type == GET_FREQ:
+                print("Received: GET_FREQ")
                 self.__netif.response(self.__lite.get_freq())
             elif type == SET_FREQ:
+                print("Received: SET_FREQ")
                 if len(request) != 2:
                     self.__netif.response("Error - wrong number of parameters!")
                 else:
                     self.__netif.response(self.__lite.set_freq(request[1]))
             elif type == SET_BAND:
+                print("Received: SET_BAND")
                 if len(request) != 2:
                     self.__netif.response("Error - wrong number of parameters!")
                 else:
                     self.__netif.response(self.__lite.set_band(request[1])) 
             elif type == SET_TX:
+                print("Received: SET_TX")
                 self.__lite.set_tx()
             elif type == SET_IDLE:
+                print("Received: SET_IDLE")
                 self.__lite.set_idle()
             elif type == GET_STATUS:
+                print("Received: GET_STATUS")
                 self.__netif.response(self.__lite.get_status())
         except pickle.UnpicklingError:
             self.__netif.response('Failed to unpickle request data!')

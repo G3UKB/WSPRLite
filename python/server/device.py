@@ -440,6 +440,7 @@ class WSPRLite(object):
         crc = self.calc_crc_32(data)
         self.__set_tx_msg = START + data + crc + END
         self.__status = WAIT_START
+        print("Waiting for even minute to start TX...")
         self.__timer.wait_start()
 
     #----------------------------------------------
@@ -451,6 +452,7 @@ class WSPRLite(object):
         crc = self.calc_crc_32(data)
         self.__idle_msg = START + data + crc + END
         self.__status = WAIT_STOP
+        print("Waiting for just before next even minute to stop TX...")
         self.__timer.wait_stop()
     
     #----------------------------------------------
@@ -575,13 +577,15 @@ class WSPRLite(object):
         self.__do_response(DeviceMode.WSPR_Active)
         self.__m_start_cb(self.__reply)
         self.__status = TX_CYCLING
+        print("Starting TX cycling...")
     
     #----------------------------------------------   
     def __stop_cb(self):
         # Complete the reset message during transmission window
         self.__ser.write(self.__idle_msg)
         self.__do_response(MsgType.Reset)
-        self.__m_stop_cb(self.__reply)    
+        self.__m_stop_cb(self.__reply)
+        print("Stopped TX cycling...")
         self.__status = IDLE
         
 #========================================================================

@@ -70,7 +70,7 @@ class NetIFClient(threading.Thread):
             SET_FREQ : self.__set_freq,
             SET_BAND : self.__set_band,
             SET_TX : self.__set_tx,
-            SET_IDLE : self.__set_idle
+            SET_IDLE : self.__set_idle,
             GET_STATUS : self.__get_status
         }
     
@@ -176,7 +176,7 @@ class NetIFClient(threading.Thread):
     
     #----------------------------------------------
     # Get status
-    def __get_status
+    def __get_status(self, p):
         r, data = self.__data_exchange((GET_STATUS,), self.__address)
         if r:
             self.__callback((GET_STATUS, pickle.loads(data)))
