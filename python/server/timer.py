@@ -97,13 +97,11 @@ class TimerThrd (threading.Thread):
             try:
                 rqst = self.__q.get(timeout=1)
                 if rqst == WAIT_START:
-                    self.__start_callback(WAITING)
                     self.__start_time()
-                    self.__start_callback(RUNTIME)
+                    self.__start_callback()
                 elif rqst == WAIT_STOP:
-                    self.__stop_callback(WAITING)
                     self.__stop_time()
-                    self.__stop_callback(STOPTIME)
+                    self.__stop_callback()
             except:
                 continue
             
