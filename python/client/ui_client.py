@@ -319,7 +319,7 @@ class UIClient(QMainWindow):
         if self.__txstatus == IDLE:
             self.ltxstate.setStyleSheet("color: green; font: 14px")
         elif self.__txstatus == WAIT_START or self.__txstatus == WAIT_STOP:
-            self.ltxstate.setStyleSheet("color: orange; font: 14px")
+            self.ltxstate.setStyleSheet("color: rgb(190,79,24); font: 14px")
         elif self.__txstatus == TX_CYCLING:
             self.ltxstate.setStyleSheet("color: red; font: 14px")
         
@@ -339,7 +339,6 @@ class UIClient(QMainWindow):
                     cmd = data[0]
                     flag = data[1][0]
                     result = data[1][1]
-                    print(cmd, flag, result)
                     if flag:
                         self.__connected = True
                         if cmd == GET_CALLSIGN:
