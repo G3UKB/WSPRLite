@@ -24,7 +24,8 @@
 # Global definitions for WSPRLite application
 
 # UI idle callbacks 200ms
-IDLE_TICKER = 200   
+IDLE_TICKER = 200
+STATUS_TICKER = 10
 
 # Server connection info
 RQST_IP = '0.0.0.0'

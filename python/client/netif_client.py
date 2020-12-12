@@ -73,6 +73,8 @@ class NetIFClient(threading.Thread):
             SET_IDLE : self.__set_idle,
             GET_STATUS : self.__get_status
         }
+        
+        self.__lock = threading.Lock()
     
     #----------------------------------------------
     # Terminate
@@ -107,7 +109,7 @@ class NetIFClient(threading.Thread):
         if r:
             self.__callback((GET_CALLSIGN, pickle.loads(data)))
         else:
-            self.__callback((GET_CALLSIGN, (False, data)))
+            self.__callback((GET_CALLSIGN, (False, '')))
     
     #----------------------------------------------
     # Get locator
@@ -117,7 +119,7 @@ class NetIFClient(threading.Thread):
         if r:
             self.__callback((GET_LOCATOR, pickle.loads(data)))
         else:
-            self.__callback((GET_LOCATOR, (False, data)))
+            self.__callback((GET_LOCATOR, (False, '')))
             
     #----------------------------------------------
     # Get actual TX frequency
@@ -127,7 +129,7 @@ class NetIFClient(threading.Thread):
         if r:
             self.__callback((GET_FREQ, pickle.loads(data)))
         else:
-            self.__callback((GET_FREQ, (False, data)))
+            self.__callback((GET_FREQ, (False, '')))
             
     #----------------------------------------------
     # Set TX frequency
@@ -137,7 +139,7 @@ class NetIFClient(threading.Thread):
         if r:
             self.__callback((SET_FREQ, pickle.loads(data)))
         else:
-            self.__callback((SET_FREQ, (False, data)))
+            self.__callback((SET_FREQ, (False, '')))
             
     #----------------------------------------------
     # Set band
@@ -147,7 +149,7 @@ class NetIFClient(threading.Thread):
         if r:
             self.__callback((SET_BAND, pickle.loads(data)))
         else:
-            self.__callback((SET_BAND, (False, data)))
+            self.__callback((SET_BAND, (False, '')))
 
     #----------------------------------------------
     # These are async messages in that the server will wait for the appropriate time
@@ -162,7 +164,7 @@ class NetIFClient(threading.Thread):
         if r:
             self.__callback((SET_TX, pickle.loads(data)))
         else:
-            self.__callback((SET_TX, (False, data)))
+            self.__callback((SET_TX, (False, '')))
         
     #----------------------------------------------
     # Set idle
@@ -172,7 +174,7 @@ class NetIFClient(threading.Thread):
         if r:
             self.__callback((SET_IDLE, pickle.loads(data)))
         else:
-            self.__callback((SET_IDLE, (False, data)))
+            self.__callback((SET_IDLE, (False, '')))
     
     #----------------------------------------------
     # Get status
@@ -181,18 +183,21 @@ class NetIFClient(threading.Thread):
         if r:
             self.__callback((GET_STATUS, pickle.loads(data)))
         else:
-            self.__callback((GET_STATUS, (False, data)))
+            self.__callback((GET_STATUS, (False, '')))
             
     #----------------------------------------------
     # Send to device
     def __data_exchange(self, msg, address):
         """ Send the given message over UDP """
+        self.__lock.acquire()
         pickledData = pickle.dumps(msg)
         try:
             self.__sock.sendto(pickledData, address)
             data, addr = self.__sock.recvfrom(100)
+            self.__lock.release()
             return (True, data)
         except socket.timeout:
+            self.__lock.release()
             return False, "Timeout on read!"
         
 '''        

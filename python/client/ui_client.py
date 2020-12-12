@@ -80,7 +80,7 @@ class UIClient(QMainWindow):
         self.repaint()
         
         # Set a timer
-        QTimer.singleShot(IDLE_TICKER, self.__idleProcessing)
+        QTimer.singleShot(2000, self.__idleProcessing)
     
     # =====================================================================
     # UI initialisation and window event handlers
@@ -269,23 +269,25 @@ class UIClient(QMainWindow):
                 f = float(self.__liteFreq)/1000000.0
                 self.wfreqget.setText(str(f))
                 # Set band according to frequency device is set to
-                upper, lower, band = find_band(f)
-                if str(band) in BANDS_AVAILABLE:
-                    # Set the band in drop down but dont send else freq will be reset
-                    index = self.wband.findText(str(band), Qt.MatchFixedString)
-                    if index >= 0:
-                        self.wband.setCurrentIndex(index)
-                        # Set LPF filter
-                        r = webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
-                        if not r[0]:
-                            msg = QMessageBox()
-                            msg.setIcon(QMessageBox.Information)
-                            msg.setText("LPF Failure!")
-                            msg.setInformativeText("Failed to select LPF filter.")
-                            msg.setWindowTitle("Info")
-                            msg.setDetailedText(r[1])
-                            msg.setStandardButtons(QMessageBox.Ok)
-                            retval = msg.exec_()
+                result = find_band(f)
+                if result != None:
+                    upper, lower, band = result
+                    if str(band) in BANDS_AVAILABLE:
+                        # Set the band in drop down but dont send else freq will be reset
+                        index = self.wband.findText(str(band), Qt.MatchFixedString)
+                        if index >= 0:
+                            self.wband.setCurrentIndex(index)
+                            # Set LPF filter
+                            r = webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
+                            if not r[0]:
+                                msg = QMessageBox()
+                                msg.setIcon(QMessageBox.Information)
+                                msg.setText("LPF Failure!")
+                                msg.setInformativeText("Failed to select LPF filter.")
+                                msg.setWindowTitle("Info")
+                                msg.setDetailedText(r[1])
+                                msg.setStandardButtons(QMessageBox.Ok)
+                                retval = msg.exec_()
                 # Enable buttons
                 self.bfreqset.setEnabled(True)
                 self.bbandset.setEnabled(True)
@@ -317,7 +319,7 @@ class UIClient(QMainWindow):
         if self.__txstatus == IDLE:
             self.ltxstate.setStyleSheet("color: green; font: 14px")
         elif self.__txstatus == WAIT_START or self.__txstatus == WAIT_STOP:
-            self.ltxstate.setStyleSheet("color: amber; font: 14px")
+            self.ltxstate.setStyleSheet("color: orange; font: 14px")
         elif self.__txstatus == TX_CYCLING:
             self.ltxstate.setStyleSheet("color: red; font: 14px")
         
@@ -330,23 +332,26 @@ class UIClient(QMainWindow):
     # ------------------------------------------------------
     # Callback from net interface
     def __netCallback(self, data):
-        print(data)
-        cmd = data[0]
-        flag = data[1][0]
-        result = data[1][1]
-        print(cmd, flag, result)
-        if flag:
-            self.__connected = True
-            if cmd == GET_CALLSIGN:
-                self.__liteCallsign = result
-            elif cmd == GET_LOCATOR:
-                self.__liteLocator = result
-            elif cmd == GET_FREQ:
-                self.__liteFreq = str(result)
-            elif cmd == SET_BAND:
-                self.__liteFreq = str(result)
-            elif cmd == GET_STATUS:
-                self.__txstatus = result
-        else:
-            self.__connected = False
+        
+        if len(data) == 2:
+            if data[1] != None:
+                if len(data[1]) == 2:
+                    cmd = data[0]
+                    flag = data[1][0]
+                    result = data[1][1]
+                    print(cmd, flag, result)
+                    if flag:
+                        self.__connected = True
+                        if cmd == GET_CALLSIGN:
+                            self.__liteCallsign = result
+                        elif cmd == GET_LOCATOR:
+                            self.__liteLocator = result
+                        elif cmd == GET_FREQ:
+                            self.__liteFreq = str(result)
+                        elif cmd == SET_BAND:
+                            self.__liteFreq = str(result)
+                        elif cmd == GET_STATUS:
+                            self.__txstatus = result
+                    else:
+                        self.__connected = False
         
