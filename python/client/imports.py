@@ -42,7 +42,7 @@ pp = pprint.PrettyPrinter(indent=1)
 from PyQt5.QtCore import Qt, QCoreApplication, QTimer, QObject, QRect, QEvent, QMargins
 from PyQt5.QtGui import QPalette, QColor, QFont, QIcon, QPainter, QPixmap, QPen
 from PyQt5.QtWidgets import QApplication, qApp
-from PyQt5.QtWidgets import QWidget, QToolTip, QStyle, QStatusBar, QMainWindow, QDialog, QAction, QMessageBox, QInputDialog, QDialogButtonBox
+from PyQt5.QtWidgets import QWidget, QToolTip, QStyle, QStatusBar, QMainWindow, QDialog, QAction, QMessageBox, QInputDialog, QDialogButtonBox, QGroupBox
 from PyQt5.QtWidgets import QGridLayout, QVBoxLayout, QHBoxLayout
 from PyQt5.QtWidgets import QFrame, QLabel, QButtonGroup, QPushButton, QRadioButton, QComboBox, QCheckBox, QSpinBox, QTabWidget, QLineEdit
 
