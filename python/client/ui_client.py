@@ -330,6 +330,7 @@ class UIClient(QMainWindow):
     # ------------------------------------------------------
     # Callback from net interface
     def __netCallback(self, data):
+        print(data)
         cmd = data[0]
         flag = data[1][0]
         result = data[1][1]

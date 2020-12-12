@@ -110,6 +110,7 @@ class WSPRLiteMain:
             elif type == GET_STATUS:
                 print("Received: GET_STATUS")
                 self.__netif.response(self.__lite.get_status())
+                print("Returned: ", self.__lite.get_status())
         except pickle.UnpicklingError:
             self.__netif.response('Failed to unpickle request data!')
 
