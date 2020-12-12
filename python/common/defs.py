@@ -42,6 +42,11 @@ SERVER_PORT = 10001
 # Timer commands
 WAIT_START = 0
 WAIT_STOP = 1
+# Timer status
+IDLE = 'IDLE'
+WAIT_START = 'WAIT-START'
+TX_CYCLING = 'TX-CYCLING'
+WAIT_STOP = 'WAIT-STOP'
 
 # Request types
 GET_CALLSIGN = 'get-callsign'
@@ -51,3 +56,4 @@ SET_FREQ = 'set-freq'
 SET_BAND = 'set-band'
 SET_TX = 'set-tx'
 SET_IDLE = 'set-idle'
+GET_STATUS = 'get-status'

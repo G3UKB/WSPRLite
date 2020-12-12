@@ -52,7 +52,10 @@ class UIClient(QMainWindow):
         # Class vars
         self.__liteCallsign = ''
         self.__liteLocator = ''
-        self.__liteFreq = ''
+        self.__liteFreq = 0
+        self.__connected = False
+        self.__lastState = False
+        self.__txstatus = IDLE
         
         # Set the back colour
         palette = QPalette()
@@ -89,6 +92,16 @@ class UIClient(QMainWindow):
         # Arrange window
         self.move(100, 100)
         self.setWindowTitle('WSPRLite Automation')
+        
+        self.statusBar = QStatusBar()
+        self.setStatusBar(self.statusBar)
+        #self.statusBar.showMessage("Not connected")
+        self.bmessage = QLabel("Not connected")
+        self.bmessage.setStyleSheet("color: red; font: 14px")
+        self.btime = QLabel("")
+        self.btime.setStyleSheet("color: blue; font: 14px")
+        self.statusBar.addWidget(self.bmessage)
+        self.statusBar.addPermanentWidget(self.btime)
         
         # Set layout
         w = QWidget()
@@ -135,12 +148,14 @@ class UIClient(QMainWindow):
         
         ltx = QLabel("TX")
         self.__grid.addWidget(ltx, 5, 0)
-        self.btxon = QPushButton('Start')
-        self.__grid.addWidget(self.btxon, 5, 1)
-        self.btxon.clicked.connect(self.__start)
-        self.btxoff = QPushButton('Stop')
-        self.__grid.addWidget(self.btxoff, 5, 2)
-        self.btxoff.clicked.connect(self.__stop)
+        self.btx = QPushButton('Start')
+        self.btx.setCheckable(True)
+        self.btx.setStyleSheet("color: green; font: 14px")
+        self.__grid.addWidget(self.btx, 5, 1)
+        self.btx.clicked.connect(self.__run)
+        self.ltxstate = QLabel(self.__txstatus)
+        self.ltxstate.setStyleSheet("color: green; font: 14px")
+        self.__grid.addWidget(self.ltxstate, 5, 2)
     
     # ------------------------------------------------------
     # Run the application
@@ -168,7 +183,6 @@ class UIClient(QMainWindow):
                 f = f + (s[i])
         f = float(f)/1000000.0
         upper, lower, band = find_band(f)
-        print(band)
         if band == None:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
@@ -187,7 +201,16 @@ class UIClient(QMainWindow):
                 if index >= 0:
                     self.wband.setCurrentIndex(index)
                     # Set LPF filter
-                    webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
+                    r = webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
+                    if not r[0]:
+                        msg = QMessageBox()
+                        msg.setIcon(QMessageBox.Information)
+                        msg.setText("LPF Failure!")
+                        msg.setInformativeText("Failed to select LPF filter.")
+                        msg.setWindowTitle("Info")
+                        msg.setDetailedText(r[1])
+                        msg.setStandardButtons(QMessageBox.Ok)
+                        retval = msg.exec_()
             else:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Information)
@@ -204,15 +227,28 @@ class UIClient(QMainWindow):
         band = int(self.wband.currentText())
         self.__netq.append((SET_BAND, band))
         # Set LPF filter
-        webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
+        r = webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
+        if not r[0]:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("LPF Failure!")
+            msg.setInformativeText("Failed to select LPF filter.")
+            msg.setWindowTitle("Info")
+            msg.setDetailedText(r[1])
+            msg.setStandardButtons(QMessageBox.Ok)
+            retval = msg.exec_()
     
     # ------------------------------------------------------
     # TX Control
-    def __start(self, ):
-        self.__netq.append((SET_TX, None))
-    
-    def __stop(self, ):
-        self.__netq.append((SET_IDLE, None))
+    def __run(self, ):
+        if self.btx.isChecked:
+            self.__netq.append((SET_TX, None))
+            self.btx.setText("Stop")
+            self.btx.setStyleSheet("color: red; font: 14px")
+        else:
+            self.__netq.append((SET_IDLE, None))
+            self.btx.setText("Start")
+            self.btx.setStyleSheet("color: green; font: 14px")
         
     #========================================================================================
     # Idle time processing 
@@ -223,9 +259,66 @@ class UIClient(QMainWindow):
         Called every 100ms single shot
         
         """
-        self.wcallsign.setText(self.__liteCallsign)
-        self.wlocator.setText(self.__liteLocator)
-        self.wfreqget.setText(str(float(self.__liteFreq)/1000000.0))
+    
+        # Manage status
+        if self.__lastState != self.__connected:
+            if self.__connected:
+                # Set info
+                self.wcallsign.setText(self.__liteCallsign)
+                self.wlocator.setText(self.__liteLocator)
+                f = float(self.__liteFreq)/1000000.0
+                self.wfreqget.setText(str(f))
+                # Set band according to frequency device is set to
+                upper, lower, band = find_band(f)
+                if str(band) in BANDS_AVAILABLE:
+                    # Set the band in drop down but dont send else freq will be reset
+                    index = self.wband.findText(str(band), Qt.MatchFixedString)
+                    if index >= 0:
+                        self.wband.setCurrentIndex(index)
+                        # Set LPF filter
+                        r = webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
+                        if not r[0]:
+                            msg = QMessageBox()
+                            msg.setIcon(QMessageBox.Information)
+                            msg.setText("LPF Failure!")
+                            msg.setInformativeText("Failed to select LPF filter.")
+                            msg.setWindowTitle("Info")
+                            msg.setDetailedText(r[1])
+                            msg.setStandardButtons(QMessageBox.Ok)
+                            retval = msg.exec_()
+                # Enable buttons
+                self.bfreqset.setEnabled(True)
+                self.bbandset.setEnabled(True)
+                self.btx.setEnabled(True)
+                # Tell user
+                self.bmessage.setText("Connected")
+                self.bmessage.setStyleSheet("color: green; font: 14px")
+            else:
+                # Try again
+                self.__netq.append((GET_CALLSIGN, None))
+                self.__netq.append((GET_LOCATOR, None))
+                self.__netq.append((GET_FREQ, None))
+                # Disable buttons
+                self.bfreqset.setEnabled(False)
+                self.bbandset.setEnabled(False)
+                self.btx.setEnabled(False)
+                # Tell user
+                self.bmessage.setText("Not Connected!")
+                self.bmessage.setStyleSheet("color: red; font: 14px")
+            # Update state
+            self.__lastState = self.__connected
+            
+        # Update time
+        self.btime.setText(time.strftime("%H"+":"+"%M"+":"+"%S"))
+        
+        # Update TX status
+        self.ltxstate.setText(self.__txstate)
+        if self.__txstate == IDLE:
+            self.ltxstate.setStyleSheet("color: green; font: 14px")
+        elif self.__txstate == WAIT_START or self.__txstate == WAIT_STOP:
+            self.ltxstate.setStyleSheet("color: amber; font: 14px")
+        elif self.__txstate == TX_CYCLING:
+            self.ltxstate.setStyleSheet("color: red; font: 14px")
         
         # Set next tick
         QTimer.singleShot(IDLE_TICKER, self.__idleProcessing)
@@ -241,6 +334,7 @@ class UIClient(QMainWindow):
         result = data[1][1]
         
         if flag:
+            self.__connected = True
             if cmd == GET_CALLSIGN:
                 self.__liteCallsign = result
             elif cmd == GET_LOCATOR:
@@ -249,4 +343,8 @@ class UIClient(QMainWindow):
                 self.__liteFreq = str(result)
             elif cmd == SET_BAND:
                 self.__liteFreq = str(result)
+            elif cmd == GET_STATUS:
+                self.__txstatus = result
+        else:
+            self.__connected = False
         

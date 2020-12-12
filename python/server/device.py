@@ -353,6 +353,9 @@ class WSPRLite(object):
         # Create timer instance
         self.__timer = timer.TimerThrd(self.__start_cb, self.__stop_cb)
         self.__timer.start()
+        
+        # TX status
+        self.__status = IDLE
     
     #----------------------------------------------
     # Terminate
@@ -436,8 +439,9 @@ class WSPRLite(object):
         data = MsgType.DeviceMode_Set.value + DeviceMode.WSPR_Active.value
         crc = self.calc_crc_32(data)
         self.__set_tx_msg = START + data + crc + END
+        self.__status = WAIT_START
         self.__timer.wait_start()
-    
+
     #----------------------------------------------
     # Stop transmitting
     # Note this should be done immediately after a transmission, not during tramsmission
@@ -446,7 +450,13 @@ class WSPRLite(object):
         data = MsgType.Reset.value
         crc = self.calc_crc_32(data)
         self.__idle_msg = START + data + crc + END
+        self.__status = WAIT_STOP
         self.__timer.wait_stop()
+    
+    #----------------------------------------------
+    # Get TX status
+    def get_status(self):
+        return self.__status
     
     #----------------------------------------------
     # Util methods
@@ -564,6 +574,7 @@ class WSPRLite(object):
         self.__ser.write(self.__set_tx_msg)
         self.__do_response(DeviceMode.WSPR_Active)
         self.__m_start_cb(self.__reply)
+        self.__status = TX_CYCLING
     
     #----------------------------------------------   
     def __stop_cb(self):
@@ -571,7 +582,8 @@ class WSPRLite(object):
         self.__ser.write(self.__idle_msg)
         self.__do_response(MsgType.Reset)
         self.__m_stop_cb(self.__reply)    
-
+        self.__status = IDLE
+        
 #========================================================================
 # Module Test       
 if __name__ == '__main__':

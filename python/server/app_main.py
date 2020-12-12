@@ -100,6 +100,8 @@ class WSPRLiteMain:
                 self.__lite.set_tx()
             elif type == SET_IDLE:
                 self.__lite.set_idle()
+            elif type == GET_STATUS:
+                self.__netif.response(self.__lite.get_status())
         except pickle.UnpicklingError:
             self.__netif.response('Failed to unpickle request data!')
 

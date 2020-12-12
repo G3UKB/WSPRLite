@@ -26,6 +26,7 @@
 # All imports
 from imports import *
 
+#-------------------------------------------------
 # Band to channel number
 band_lookup = {
     160 : 0,
@@ -43,15 +44,22 @@ def set_lpf(ip, port, band):
     on_ch = band_lookup[band]
     # Turn all channels off first
     for ch in range(6):
-        set_web_relays(ip, port, ch, 'off')
+        r = set_web_relays(ip, port, ch, 'off')
+        if not r[0]:
+            return(r)
     # Set the target channel
-    set_web_relays(ip, port, on_ch, 'on')
-    
+    r = set_web_relays(ip, port, on_ch, 'on')
+    return r
+
 #-------------------------------------------------
 # This uses the webrelay_min.py Cherrypy server.
 # Its only function is to set/reset relays.
 # For the full interface use webrelay.py and a browser client.
 # Note that the minimal web relay app requires channels to be zero based
 def set_web_relays(ip, port, relay, state):
-    urllib.request.urlopen('http://%s:%d/set_channel?relay=%d;state=%s' % (ip, port, relay, state))
+    try:
+        urllib.request.urlopen('http://%s:%d/set_channel?relay=%d;state=%s' % (ip, port, relay, state))
+    except Exception as e:
+       return (False, str(e))
+    return (True, '')
     

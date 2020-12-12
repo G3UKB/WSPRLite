@@ -2,7 +2,7 @@
 #
 # freq_table.py
 # 
-# Copyright (C) 2019 by G3UKB Bob Cowdery
+# Copyright (C) 2020 by G3UKB Bob Cowdery
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -22,8 +22,9 @@
 #
 
 import random
-# Return a random TX frequency within the given band.
 
+#------------------------------------------------------------
+# Allocated WSPR bands
 band_lookup = {
     160: (1.836600, 1.838100),
     80: (3.568600, 3.570100),
@@ -40,20 +41,26 @@ band_lookup = {
     2: (144.489000, 144.490500)
 }
 
+#------------------------------------------------------------
+# Return a random TX frequency within the given band.
 def get_tx_freq(band):
-    
     range = band_lookup[band]
     return round(random.uniform(range[0], range[1]), 6)
 
+#------------------------------------------------------------
+# Given a frequency find the band it falls inside
 def find_band(freq):
     for band in band_lookup.keys():
         lower = band_lookup[band][0]
         upper = band_lookup[band][1]
-        print(freq, lower, upper)
         if freq >= lower and freq <= upper:
+            # Success
             return lower, upper, band
+    # Failed!
     return None
- 
+
+#------------------------------------------------------------
+# String copy of band limits.
 def get_band_limits():
     return '''
 160: (1.836600, 1.838100),
@@ -71,19 +78,3 @@ def get_band_limits():
 2:   (144.489000, 144.490500)
 '''
     
-#========================================================================
-# Module Test
-if __name__ == '__main__':
-    print(get_tx_freq(160))
-    print(get_tx_freq(80))
-    print(get_tx_freq(60))
-    print(get_tx_freq(40))
-    print(get_tx_freq(30))
-    print(get_tx_freq(20))
-    print(get_tx_freq(17))
-    print(get_tx_freq(15))
-    print(get_tx_freq(12))
-    print(get_tx_freq(10))
-    print(get_tx_freq(6))
-    print(get_tx_freq(4))
-    print(get_tx_freq(2))

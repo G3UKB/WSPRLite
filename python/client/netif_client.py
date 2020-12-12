@@ -71,6 +71,7 @@ class NetIFClient(threading.Thread):
             SET_BAND : self.__set_band,
             SET_TX : self.__set_tx,
             SET_IDLE : self.__set_idle
+            GET_STATUS : self.__get_status
         }
     
     #----------------------------------------------
@@ -173,6 +174,15 @@ class NetIFClient(threading.Thread):
         else:
             self.__callback((SET_IDLE, (False, data)))
     
+    #----------------------------------------------
+    # Get status
+    def __get_status
+        r, data = self.__data_exchange((GET_STATUS,), self.__address)
+        if r:
+            self.__callback((GET_STATUS, pickle.loads(data)))
+        else:
+            self.__callback((GET_STATUS, (False, data)))
+            
     #----------------------------------------------
     # Send to device
     def __data_exchange(self, msg, address):
