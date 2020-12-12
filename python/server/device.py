@@ -460,7 +460,7 @@ class WSPRLite(object):
     #----------------------------------------------
     # Get TX status
     def get_status(self):
-        return self.__status
+        return (True, self.__status)
     
     #----------------------------------------------
     # Util methods

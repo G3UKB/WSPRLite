@@ -312,6 +312,7 @@ class UIClient(QMainWindow):
         self.btime.setText(time.strftime("%H"+":"+"%M"+":"+"%S"))
         
         # Update TX status
+        self.__netq.append((GET_STATUS, None))
         self.ltxstate.setText(self.__txstatus)
         if self.__txstatus == IDLE:
             self.ltxstate.setStyleSheet("color: green; font: 14px")
