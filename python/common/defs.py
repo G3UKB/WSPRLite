@@ -37,7 +37,7 @@ WEBRELAY_PORT = 8080
 BANDS_AVAILABLE = ('160','80','40','20','15','10')
 
 # Client connection info
-SERVER_IP = '192.168.1.114'
+SERVER_IP = '192.168.1.115'
 SERVER_PORT = 10001
 
 # Timer commands

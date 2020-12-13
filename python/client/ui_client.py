@@ -56,10 +56,11 @@ class UIClient(QMainWindow):
         self.__connected = False
         self.__lastState = False
         self.__txstatus = IDLE
+        self.__lpf = True
         
         # Set the back colour
         palette = QPalette()
-        palette.setColor(QPalette.Background,QColor(195,195,195,255))
+        palette.setColor(QPalette.Background,QColor(124,124,124,255))
         self.setPalette(palette)
         
         # Create the net interface and a q to dispatch to
@@ -123,19 +124,19 @@ class UIClient(QMainWindow):
         lcallsign = QLabel("Callsign")
         self.__gridstatus.addWidget(lcallsign, 0, 0)
         self.wcallsign = QLabel("")
-        self.wcallsign.setStyleSheet("color: green; font: 16px")
+        self.wcallsign.setStyleSheet("color: rgb(35,45,38); font: 16px")
         self.__gridstatus.addWidget(self.wcallsign, 0, 1)
         
         llocator = QLabel("Locator")
         self.__gridstatus.addWidget(llocator, 1, 0)
         self.wlocator = QLabel("")
-        self.wlocator.setStyleSheet("color: green; font: 16px")
+        self.wlocator.setStyleSheet("color: rgb(35,45,38); font: 16px")
         self.__gridstatus.addWidget(self.wlocator, 1, 1)
         
         lfreqget = QLabel("Current Freq")
         self.__gridstatus.addWidget(lfreqget, 2, 0)
         self.wfreqget = QLabel("")
-        self.wfreqget.setStyleSheet("color: red; font: 16px")
+        self.wfreqget.setStyleSheet("color: rgb(35,45,38); font: 16px")
         self.__gridstatus.addWidget(self.wfreqget, 2, 1)
         
         lfreqset = QLabel("Set Freq")
@@ -160,13 +161,20 @@ class UIClient(QMainWindow):
         self.__gridcntrl.addWidget(ltx, 2, 0)
         self.btx = QPushButton('Start')
         self.btx.setCheckable(True)
-        self.btx.setStyleSheet("color: green; font: 14px")
+        self.btx.setStyleSheet("color: rgb(27,86,35); font: 14px")
         self.__gridcntrl.addWidget(self.btx, 2, 1)
         self.btx.clicked.connect(self.__run)
         self.ltxstate = QLabel(self.__txstatus)
-        self.ltxstate.setStyleSheet("color: green; font: 14px")
+        self.ltxstate.setStyleSheet("color: rgb(27,86,35); font: 14px")
         self.__gridcntrl.addWidget(self.ltxstate, 2, 2)
     
+        lfilter = QLabel("LPF")
+        self.__gridcntrl.addWidget(lfilter, 3, 0)
+        self.cbfilter = QCheckBox()
+        self.cbfilter.setChecked(True)
+        self.__gridcntrl.addWidget(self.cbfilter, 3, 1)
+        self.cbfilter.clicked.connect(self.__cbfilter)
+        
     # ------------------------------------------------------
     # Run the application
     def run(self, ):
@@ -211,16 +219,17 @@ class UIClient(QMainWindow):
                 if index >= 0:
                     self.wband.setCurrentIndex(index)
                     # Set LPF filter
-                    r = webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
-                    if not r[0]:
-                        msg = QMessageBox()
-                        msg.setIcon(QMessageBox.Information)
-                        msg.setText("LPF Failure!")
-                        msg.setInformativeText("Failed to select LPF filter.")
-                        msg.setWindowTitle("Info")
-                        msg.setDetailedText(r[1])
-                        msg.setStandardButtons(QMessageBox.Ok)
-                        retval = msg.exec_()
+                    if self.__lpf:
+                        r = webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
+                        if not r[0]:
+                            msg = QMessageBox()
+                            msg.setIcon(QMessageBox.Information)
+                            msg.setText("LPF Failure!")
+                            msg.setInformativeText("Failed to select LPF filter.")
+                            msg.setWindowTitle("Info")
+                            msg.setDetailedText(r[1])
+                            msg.setStandardButtons(QMessageBox.Ok)
+                            retval = msg.exec_()
             else:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Information)
@@ -237,16 +246,17 @@ class UIClient(QMainWindow):
         band = int(self.wband.currentText())
         self.__netq.append((SET_BAND, band))
         # Set LPF filter
-        r = webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
-        if not r[0]:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Information)
-            msg.setText("LPF Failure!")
-            msg.setInformativeText("Failed to select LPF filter.")
-            msg.setWindowTitle("Info")
-            msg.setDetailedText(r[1])
-            msg.setStandardButtons(QMessageBox.Ok)
-            retval = msg.exec_()
+        if self.__lpf:
+            r = webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
+            if not r[0]:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("LPF Failure!")
+                msg.setInformativeText("Failed to select LPF filter.")
+                msg.setWindowTitle("Info")
+                msg.setDetailedText(r[1])
+                msg.setStandardButtons(QMessageBox.Ok)
+                retval = msg.exec_()
     
     # ------------------------------------------------------
     # TX Control
@@ -259,7 +269,15 @@ class UIClient(QMainWindow):
             self.__netq.append((SET_IDLE, None))
             self.btx.setText("Start")
             self.btx.setStyleSheet("color: green; font: 14px")
-        
+    
+    # ------------------------------------------------------
+    # LPF change
+    def __cbfilter(self, ):
+        if self.cbfilter.isChecked():
+            self.__lpf = True
+        else:
+            self.__lpf = False
+            
     #========================================================================================
     # Idle time processing 
     def __idleProcessing(self):
@@ -288,16 +306,17 @@ class UIClient(QMainWindow):
                         if index >= 0:
                             self.wband.setCurrentIndex(index)
                             # Set LPF filter
-                            r = webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
-                            if not r[0]:
-                                msg = QMessageBox()
-                                msg.setIcon(QMessageBox.Information)
-                                msg.setText("LPF Failure!")
-                                msg.setInformativeText("Failed to select LPF filter.")
-                                msg.setWindowTitle("Info")
-                                msg.setDetailedText(r[1])
-                                msg.setStandardButtons(QMessageBox.Ok)
-                                retval = msg.exec_()
+                            if self.__lpf:
+                                r = webrelay.set_lpf(WEBRELAY_IP, WEBRELAY_PORT, band)
+                                if not r[0]:
+                                    msg = QMessageBox()
+                                    msg.setIcon(QMessageBox.Information)
+                                    msg.setText("LPF Failure!")
+                                    msg.setInformativeText("Failed to select LPF filter.")
+                                    msg.setWindowTitle("Info")
+                                    msg.setDetailedText(r[1])
+                                    msg.setStandardButtons(QMessageBox.Ok)
+                                    retval = msg.exec_()
                 # Enable buttons
                 self.bfreqset.setEnabled(True)
                 self.bbandset.setEnabled(True)
@@ -323,15 +342,19 @@ class UIClient(QMainWindow):
         # Update time
         self.btime.setText(time.strftime("%H"+":"+"%M"+":"+"%S"))
         
+        # Update frequency
+        f = float(self.__liteFreq)/1000000.0
+        self.wfreqget.setText(str(f))
+                
         # Update TX status
         self.__netq.append((GET_STATUS, None))
         self.ltxstate.setText(self.__txstatus)
         if self.__txstatus == IDLE:
-            self.ltxstate.setStyleSheet("color: green; font: 14px")
+            self.ltxstate.setStyleSheet("color: rgb(27,86,35); font: 14px")
         elif self.__txstatus == WAIT_START or self.__txstatus == WAIT_STOP:
-            self.ltxstate.setStyleSheet("color: rgb(190,79,24); font: 14px")
+            self.ltxstate.setStyleSheet("color: rgb(136,45,0); font: 14px")
         elif self.__txstatus == TX_CYCLING:
-            self.ltxstate.setStyleSheet("color: red; font: 14px")
+            self.ltxstate.setStyleSheet("color: rgb(142,26,26); font: 14px")
         
         # Set next tick
         QTimer.singleShot(IDLE_TICKER, self.__idleProcessing)
@@ -342,7 +365,6 @@ class UIClient(QMainWindow):
     # ------------------------------------------------------
     # Callback from net interface
     def __netCallback(self, data):
-        
         if len(data) == 2:
             if data[1] != None:
                 if len(data[1]) == 2:
