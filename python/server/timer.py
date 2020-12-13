@@ -65,6 +65,7 @@ class TimerThrd (threading.Thread):
         self.__stop_callback = stop_callback
         
         self.__terminate = False
+        self.__cancel = False
         
         # Create a queue for communication with the thread
         self.__q = queue.Queue(5)
@@ -88,6 +89,11 @@ class TimerThrd (threading.Thread):
         self.__q.put(WAIT_STOP)
 
     #----------------------------------------------
+    # Called to cancel timer
+    def cancel(self):
+        self.__cancel = True
+        
+    #----------------------------------------------
     # Entry point   
     def run(self):
         """
@@ -98,10 +104,16 @@ class TimerThrd (threading.Thread):
                 rqst = self.__q.get(timeout=1)
                 if rqst == WAIT_START:
                     self.__start_time()
-                    self.__start_callback()
+                    if not self.__cancel:
+                        self.__start_callback()
+                    self.__cancel = False
                 elif rqst == WAIT_STOP:
                     self.__stop_time()
-                    self.__stop_callback()
+                    if not self.__cancel:
+                        self.__stop_callback()
+                    self.__cancel = False
+                elif rqst == CANCEL:
+                    self.__cancel = True
             except:
                 continue
             
@@ -111,7 +123,7 @@ class TimerThrd (threading.Thread):
         """
             Wait for start time
         """
-        while not self.__terminate:
+        while not self.__terminate and not self.__cancel:
             dt = datetime.datetime.utcnow()
             if dt.second == 0:
                 if dt.minute%2 == 0:
@@ -131,7 +143,7 @@ class TimerThrd (threading.Thread):
             Wait to enter stop window
         """
         
-        while not self.__terminate:
+        while not self.__terminate and not self.__cancel:
             dt = datetime.datetime.utcnow()
             if dt.second >= 55:
                 if dt.minute%2 != 0:

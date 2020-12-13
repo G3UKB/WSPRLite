@@ -43,6 +43,7 @@ SERVER_PORT = 10001
 # Timer commands
 WAIT_START = 0
 WAIT_STOP = 1
+CANCEL = 2
 # Timer status
 IDLE = 'IDLE'
 WAIT_START = 'WAIT-START'

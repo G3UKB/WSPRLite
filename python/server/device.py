@@ -436,26 +436,31 @@ class WSPRLite(object):
     # Note this must be correctly timed to an accurate clock
     def set_tx(self):
         # msg = START/8 + MsgType.DeviceMode_Set/16 + DeviceMode.WSPR_Active/16 + CRC/32 + STOP/8
-        data = MsgType.DeviceMode_Set.value + DeviceMode.WSPR_Active.value
-        crc = self.calc_crc_32(data)
-        self.__set_tx_msg = START + data + crc + END
-        self.__status = WAIT_START
-        print("Waiting for even minute to start TX...")
-        self.__timer.wait_start()
-        self.__m_start_cb((True, ''))
+        if self.__status == IDLE:
+            data = MsgType.DeviceMode_Set.value + DeviceMode.WSPR_Active.value
+            crc = self.calc_crc_32(data)
+            self.__set_tx_msg = START + data + crc + END
+            self.__status = WAIT_START
+            print("Waiting for even minute to start TX...")
+            self.__timer.wait_start()
+            self.__m_start_cb((True, ''))
 
     #----------------------------------------------
     # Stop transmitting
     # Note this should be done immediately after a transmission, not during tramsmission
     def set_idle(self):
         # msg = START/8 + MsgType.Reset/16 + CRC/32 + STOP/8
-        data = MsgType.Reset.value
-        crc = self.calc_crc_32(data)
-        self.__idle_msg = START + data + crc + END
-        self.__status = WAIT_STOP
-        print("Waiting for just before next even minute to stop TX...")
-        self.__timer.wait_stop()
-        self.__m_stop_cb((True, ''))
+        if self.__status == TX_CYCLING:
+            data = MsgType.Reset.value
+            crc = self.calc_crc_32(data)
+            self.__idle_msg = START + data + crc + END
+            self.__status = WAIT_STOP
+            print("Waiting for just before next even minute to stop TX...")
+            self.__timer.wait_stop()
+            self.__m_stop_cb((True, ''))
+        else:
+            self.__timer.cancel()
+            self.__status = IDLE
     
     #----------------------------------------------
     # Get TX status

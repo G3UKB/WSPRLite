@@ -88,7 +88,7 @@ class UIClient(QMainWindow):
     def initUI(self):
         """ Configure the GUI interface """
         
-        self.setToolTip('Antenna Switch Controller')
+        self.setToolTip('WSPRLite Automation Application')
         
         # Arrange window
         self.move(100, 100)
