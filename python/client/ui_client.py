@@ -291,6 +291,10 @@ class UIClient(QMainWindow):
         # Manage status
         if self.__lastState != self.__connected:
             if self.__connected:
+                # Get info
+                self.__netq.append((GET_CALLSIGN, None))
+                self.__netq.append((GET_LOCATOR, None))
+                self.__netq.append((GET_FREQ, None))
                 # Set info
                 self.wcallsign.setText(self.__liteCallsign)
                 self.wlocator.setText(self.__liteLocator)
@@ -342,7 +346,9 @@ class UIClient(QMainWindow):
         # Update time
         self.btime.setText(time.strftime("%H"+":"+"%M"+":"+"%S"))
         
-        # Update frequency
+        # Update data
+        self.wcallsign.setText(self.__liteCallsign)
+        self.wlocator.setText(self.__liteLocator)
         f = float(self.__liteFreq)/1000000.0
         self.wfreqget.setText(str(f))
                 
