@@ -200,8 +200,8 @@ class UIClient(QMainWindow):
             if s[i] != '.':
                 f = f + (s[i])
         f = float(f)/1000000.0
-        upper, lower, band = find_band(f)
-        if band == None:
+        result = find_band(f)
+        if result == None:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
             msg.setText("Invalid frequency!")
@@ -211,6 +211,7 @@ class UIClient(QMainWindow):
             msg.setStandardButtons(QMessageBox.Ok)
             retval = msg.exec_()
         else:
+            upper, lower, band = result
             if str(band) in BANDS_AVAILABLE:
                 # Set lite
                 self.__netq.append((SET_FREQ, f))
