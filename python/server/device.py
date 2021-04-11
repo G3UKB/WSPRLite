@@ -406,6 +406,7 @@ class WSPRLite(object):
     def set_freq(self, freq):
         f = int(freq*1000000)
         f_bytes = struct.pack('<Q', f)
+        f_bytes = self.__esc(f_bytes)
         # msg = START/8 + WRITE/16 + WSPR_txFreq/16 + CRC/32 + STOP/8
         data = MsgType.Write.value + VarId.WSPR_txFreq.value + f_bytes
         crc = self.calc_crc_32(data)
@@ -420,6 +421,7 @@ class WSPRLite(object):
         freq = freq_table.get_tx_freq(band)
         f = int(freq*1000000)
         f_bytes = struct.pack('<Q', f)
+        f_bytes = self.__esc(f_bytes)
         # msg = START/8 + WRITE/16 + WSPR_txFreq/16 + CRC/32 + STOP/8
         data = MsgType.Write.value + VarId.WSPR_txFreq.value + f_bytes
         crc = self.calc_crc_32(data)
@@ -470,6 +472,17 @@ class WSPRLite(object):
     #----------------------------------------------
     # Util methods
     #----------------------------------------------
+    # Escape any control bytes
+    def __esc(f_bytes):
+        ba = bytearray(len(f_bytes))
+        n = 0
+        for b in f_bytes:
+            if b == 0x01 or b == 0x04:
+                b = b | 0x80
+            ba[n] = b
+            n += 1
+        return ba
+    
     # Calculate a CRC32 of the given data
     def calc_crc_32(self, data):
         return struct.pack('<I', binascii.crc32(data))       
