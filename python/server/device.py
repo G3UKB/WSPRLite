@@ -473,7 +473,7 @@ class WSPRLite(object):
     # Util methods
     #----------------------------------------------
     # Escape any control bytes
-    def __esc(f_bytes):
+    def __esc(self, f_bytes):
         ba = bytearray(len(f_bytes))
         n = 0
         for b in f_bytes:
