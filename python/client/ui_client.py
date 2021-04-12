@@ -30,6 +30,7 @@ from common.defs import *
 from common.freq_table import *
 import netif_client as netif
 import webrelay
+import tuner
 
 # Attempt to import the tuner API
 DISABLE_TUNER = False
@@ -269,6 +270,9 @@ class UIClient(QMainWindow):
                             msg.setDetailedText(r[1])
                             msg.setStandardButtons(QMessageBox.Ok)
                             retval = msg.exec_()
+                    # Set tuner
+                    if self.__tuner:
+                        tuner.set_tuner(band)
             else:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Information)
@@ -296,6 +300,9 @@ class UIClient(QMainWindow):
                 msg.setDetailedText(r[1])
                 msg.setStandardButtons(QMessageBox.Ok)
                 retval = msg.exec_()
+        # Set tuner
+        if self.__tuner:
+            tuner.set_tuner(band)
     
     # ------------------------------------------------------
     # TX Control
