@@ -31,6 +31,15 @@ from common.freq_table import *
 import netif_client as netif
 import webrelay
 
+# Attempt to import the tuner API
+DISABLE_TUNER = False
+try:
+    sys.path.append('../../../../AutoTuner/trunk/python/FRIMatch/lib')
+    import tunerlib
+except ImportError:
+    print ("Failed to import Tuner API! The feature will be disabled.")
+    DISABLE_TUNER = True
+
 """
 UI for the WSPRLite client application.
 """
@@ -56,7 +65,8 @@ class UIClient(QMainWindow):
         self.__connected = False
         self.__lastState = False
         self.__txstatus = IDLE
-        self.__lpf = True
+        self.__lpf = False
+        self.__tuner = False
         
         # Set the back colour
         palette = QPalette()
@@ -171,9 +181,33 @@ class UIClient(QMainWindow):
         lfilter = QLabel("LPF")
         self.__gridcntrl.addWidget(lfilter, 3, 0)
         self.cbfilter = QCheckBox()
-        self.cbfilter.setChecked(True)
+        if WEBRELAY_ENABLE:
+            checked = True
+            self.__lpf = True
+        else:
+            checked = False
+            self.__lpf = False
+        self.cbfilter.setChecked(checked)
         self.__gridcntrl.addWidget(self.cbfilter, 3, 1)
         self.cbfilter.clicked.connect(self.__cbfilter)
+        
+        ltuner = QLabel("Tuner")
+        self.__gridcntrl.addWidget(ltuner, 3, 2)
+        self.cbtuner = QCheckBox()
+        if DISABLE_TUNER:
+            checked = False
+            self.__tuner = False
+            self.cbtuner.setEnabled(False)
+        else:
+            if TUNER_ENABLE:
+                checked = True
+                self.__tuner = True
+            else:
+                checked = False
+                self.__tuner = False
+        self.cbtuner.setChecked(checked)
+        self.__gridcntrl.addWidget(self.cbtuner, 3, 3)
+        self.cbtuner.clicked.connect(self.__cbtuner)
         
     # ------------------------------------------------------
     # Run the application
@@ -278,6 +312,14 @@ class UIClient(QMainWindow):
             self.__lpf = True
         else:
             self.__lpf = False
+    
+    # ------------------------------------------------------
+    # Tuner change
+    def __cbtuner(self, ):
+        if self.cbtuner.isChecked():
+            self.__tuner = True
+        else:
+            self.__tuner = False
             
     #========================================================================================
     # Idle time processing 
