@@ -41,8 +41,8 @@ BANDS_AVAILABLE = ('160','80','40','20','15','10')
 TUNER_ENABLE = True
 
 # Client connection info
-#SERVER_IP = '192.168.1.115'
-SERVER_IP = '192.168.1.9'
+SERVER_IP = '192.168.1.115'
+#SERVER_IP = '192.168.1.9'
 SERVER_PORT = 10001
 
 # Timer commands

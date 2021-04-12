@@ -81,7 +81,7 @@ class UIClient(QMainWindow):
         
         # Create the tuner interface
         if not DISABLE_TUNER:
-            self.__tuner = tunerlib.Tuner_API()
+            self.__tunerapi = tunerlib.Tuner_API()
             
         # Initialise the GUI
         self.initUI()
@@ -272,7 +272,7 @@ class UIClient(QMainWindow):
                             retval = msg.exec_()
                     # Set tuner
                     if self.__tuner:
-                        tuner.set_tuner(band)
+                        tuner.set_tuner(self.__tunerapi, band)
             else:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Information)
@@ -302,7 +302,7 @@ class UIClient(QMainWindow):
                 retval = msg.exec_()
         # Set tuner
         if self.__tuner:
-            tuner.set_tuner(band)
+            tuner.set_tuner(self.__tunerapi, band)
     
     # ------------------------------------------------------
     # TX Control
