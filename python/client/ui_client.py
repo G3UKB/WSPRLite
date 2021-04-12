@@ -350,9 +350,12 @@ class UIClient(QMainWindow):
         # Update data
         self.wcallsign.setText(self.__liteCallsign)
         self.wlocator.setText(self.__liteLocator)
-        f = float(self.__liteFreq)/1000000.0
-        self.wfreqget.setText(str(f))
-                
+        try:
+            freq = float(self.__liteFreq)
+            f = freq/1000000.0
+            self.wfreqget.setText(str(f))
+        except:
+            print("Error, invalid frequency: ", self.__liteFreq)      
         # Update TX status
         self.__netq.append((GET_STATUS, None))
         self.ltxstate.setText(self.__txstatus)

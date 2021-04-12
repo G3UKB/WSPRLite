@@ -198,7 +198,7 @@ class NetIFClient(threading.Thread):
             return (True, data)
         except socket.timeout:
             self.__lock.release()
-            return False, "Timeout on read!"
+            return (False, "Timeout on read!")
         
 '''        
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

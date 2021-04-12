@@ -472,17 +472,6 @@ class WSPRLite(object):
     #----------------------------------------------
     # Util methods
     #----------------------------------------------
-    # Escape any control bytes
-    def __esc(self, f_bytes):
-        ba = bytearray(len(f_bytes))
-        n = 0
-        for b in f_bytes:
-            if b == 0x01 or b == 0x04:
-                b = b | 0x80
-            ba[n] = b
-            n += 1
-        return ba
-    
     # Calculate a CRC32 of the given data
     def calc_crc_32(self, data):
         return struct.pack('<I', binascii.crc32(data))       
@@ -513,6 +502,11 @@ class WSPRLite(object):
         if b == b'\x01':
             # We have message start
             self.__state = State.START
+        elif b == b'':
+            # Lite did not respons so probably missed the command
+            # For now lets terminate this exchange.
+            self.__state = State.DONE
+            self.__reply = (False, 'Command failed!')
     
     #----------------------------------------------    
     def __do_start(self):
@@ -572,6 +566,7 @@ class WSPRLite(object):
         elif cmd == VarId.WSPR_txFreq:
             len = data_def[VarId.WSPR_txFreq]
             data = self.__ser.read(len)
+            data = self.__unesc(data)
             self.__reply = (True, struct.unpack('<Q',data)[0])
             self.__state = State.CS
             
@@ -589,6 +584,30 @@ class WSPRLite(object):
             # We have message end
             self.__state = State.DONE
 
+    #----------------------------------------------
+    # Escape any control bytes
+    def __esc(self, f_bytes):
+        ba = bytearray(len(f_bytes))
+        n = 0
+        for b in f_bytes:
+            if b == 0x01 or b == 0x04:
+                b = b | 0x80
+            ba[n] = b
+            n += 1
+        return bytes(ba)
+    
+    #----------------------------------------------
+    # Escape any control bytes
+    def __unesc(self, f_bytes):
+        ba = bytearray(len(f_bytes))
+        n = 0
+        for b in f_bytes:
+            if b == 0x81 or b == 0x84:
+                b = b & 0x05
+            ba[n] = b
+            n += 1
+        return bytes(ba)
+    
     #========================================================================
     # Callbacks
     def __start_cb(self):
