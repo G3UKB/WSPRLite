@@ -78,6 +78,10 @@ class UIClient(QMainWindow):
         self.__net = netif.NetIFClient(self.__netq, self.__netCallback)
         self.__net.start()
         
+        # Create the tuner interface
+        if not DISABLE_TUNER:
+            self.__tuner = tunerlib.Tuner_API()
+            
         # Initialise the GUI
         self.initUI()
         
