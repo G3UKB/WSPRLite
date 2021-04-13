@@ -403,22 +403,25 @@ class UIClient(QMainWindow):
         # Update data
         self.wcallsign.setText(self.__liteCallsign)
         self.wlocator.setText(self.__liteLocator)
+        success = True
         try:
             freq = float(self.__liteFreq)
             f = freq/1000000.0
             self.wfreqget.setText(str(f))
         except:
-            print("Error, invalid frequency: ", self.__liteFreq)      
-        # Update TX status
-        self.__netq.append((GET_STATUS, None))
-        self.ltxstate.setText(self.__txstatus)
-        if self.__txstatus == IDLE:
-            self.ltxstate.setStyleSheet("color: rgb(27,86,35); font: 14px")
-        elif self.__txstatus == WAIT_START or self.__txstatus == WAIT_STOP:
-            self.ltxstate.setStyleSheet("color: rgb(136,45,0); font: 14px")
-        elif self.__txstatus == TX_CYCLING:
-            self.ltxstate.setStyleSheet("color: rgb(142,26,26); font: 14px")
-        
+            print("Error, invalid frequency: ", self.__liteFreq)
+            success = False
+        if success:
+            # Update TX status
+            self.__netq.append((GET_STATUS, None))
+            self.ltxstate.setText(self.__txstatus)
+            if self.__txstatus == IDLE:
+                self.ltxstate.setStyleSheet("color: rgb(27,86,35); font: 14px")
+            elif self.__txstatus == WAIT_START or self.__txstatus == WAIT_STOP:
+                self.ltxstate.setStyleSheet("color: rgb(136,45,0); font: 14px")
+            elif self.__txstatus == TX_CYCLING:
+                self.ltxstate.setStyleSheet("color: rgb(142,26,26); font: 14px")
+            
         # Set next tick
         QTimer.singleShot(IDLE_TICKER, self.__idleProcessing)
         

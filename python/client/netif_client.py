@@ -107,7 +107,7 @@ class NetIFClient(threading.Thread):
         """ Return the configured callsign """
         r, data = self.__data_exchange((GET_CALLSIGN,), self.__address)
         if r:
-            self.__callback((GET_CALLSIGN, pickle.loads(data)))
+            self.__callback((GET_CALLSIGN, data))
         else:
             self.__callback((GET_CALLSIGN, (False, '')))
     
@@ -117,7 +117,7 @@ class NetIFClient(threading.Thread):
         """ Return the configured locator """
         r, data = self.__data_exchange((GET_LOCATOR,), self.__address)
         if r:
-            self.__callback((GET_LOCATOR, pickle.loads(data)))
+            self.__callback((GET_LOCATOR, data))
         else:
             self.__callback((GET_LOCATOR, (False, '')))
             
@@ -127,7 +127,7 @@ class NetIFClient(threading.Thread):
         """ Return the actual TX frequency in the selected band """
         r, data = self.__data_exchange((GET_FREQ,), self.__address)
         if r:
-            self.__callback((GET_FREQ, pickle.loads(data)))
+            self.__callback((GET_FREQ, data))
         else:
             self.__callback((GET_FREQ, (False, '')))
             
@@ -137,7 +137,7 @@ class NetIFClient(threading.Thread):
         """ Sets the TX frequency """
         r, data = self.__data_exchange((SET_FREQ, freq), self.__address)
         if r:
-            self.__callback((SET_FREQ, pickle.loads(data)))
+            self.__callback((SET_FREQ, data))
         else:
             self.__callback((SET_FREQ, (False, '')))
             
@@ -147,7 +147,7 @@ class NetIFClient(threading.Thread):
         """ Select the band for transmission """
         r, data = self.__data_exchange((SET_BAND, band), self.__address)
         if r:
-            self.__callback((SET_BAND, pickle.loads(data)))
+            self.__callback((SET_BAND, data))
         else:
             self.__callback((SET_BAND, (False, '')))
 
@@ -162,7 +162,7 @@ class NetIFClient(threading.Thread):
         """ Set device to tx mode """
         r, data = self.__data_exchange((SET_TX,), self.__address)
         if r:
-            self.__callback((SET_TX, pickle.loads(data)))
+            self.__callback((SET_TX, data))
         else:
             self.__callback((SET_TX, (False, '')))
         
@@ -172,7 +172,7 @@ class NetIFClient(threading.Thread):
         """ Effectively turn TX off after the next TX cycle """
         r, data = self.__data_exchange((SET_IDLE,), self.__address)
         if r:
-            self.__callback((SET_IDLE, pickle.loads(data)))
+            self.__callback((SET_IDLE, data))
         else:
             self.__callback((SET_IDLE, (False, '')))
     
@@ -181,7 +181,7 @@ class NetIFClient(threading.Thread):
     def __get_status(self, p):
         r, data = self.__data_exchange((GET_STATUS,), self.__address)
         if r:
-            self.__callback((GET_STATUS, pickle.loads(data)))
+            self.__callback((GET_STATUS, data))
         else:
             self.__callback((GET_STATUS, (False, '')))
             
@@ -193,9 +193,12 @@ class NetIFClient(threading.Thread):
         pickledData = pickle.dumps(msg)
         try:
             self.__sock.sendto(pickledData, address)
-            data, addr = self.__sock.recvfrom(100)
+            rawdata, addr = self.__sock.recvfrom(100)
+            data = pickle.loads(rawdata)
+            if data[0] != msg[0]:
+                print("Data Exchange - expected: %s, got: %s" % (msg[0], data[0]))
             self.__lock.release()
-            return (True, data)
+            return (True, data[1])
         except socket.timeout:
             self.__lock.release()
             return (False, "Timeout on read!")
