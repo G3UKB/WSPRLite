@@ -32,17 +32,17 @@ RQST_IP = '0.0.0.0'
 RQST_PORT = 10001
 
 # RPiWebRelay address for LPF selection
-WEBRELAY_ENABLE = False
+WEBRELAY_ENABLE = True
 WEBRELAY_IP = '192.168.1.115'
 WEBRELAY_PORT = 8080
 BANDS_AVAILABLE = ('160','80','40','20','15','10')
 
 # FRITuner enable
-TUNER_ENABLE = False
+TUNER_ENABLE = True
 
 # Client connection info
-#SERVER_IP = '192.168.1.115'
-SERVER_IP = '192.168.1.9'
+SERVER_IP = '192.168.1.115'
+#SERVER_IP = '192.168.1.9'
 SERVER_PORT = 10001
 
 # Timer commands
