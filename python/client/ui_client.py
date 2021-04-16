@@ -35,7 +35,7 @@ import tuner
 # Attempt to import the tuner API
 DISABLE_TUNER = False
 try:
-    sys.path.append('../../../../AutoTuner/trunk/python/FRIMatch/lib')
+    sys.path.append('../tuner_lib')
     import tunerlib
 except ImportError:
     print ("Failed to import Tuner API! The feature will be disabled.")
@@ -81,7 +81,7 @@ class UIClient(QMainWindow):
         
         # Create the tuner interface
         if not DISABLE_TUNER:
-            self.__tunerapi = tunerlib.Tuner_API()
+            self.__tunerapi = tunerlib.Tuner_API('../tuner_lib/auto_tuner.cfg')
             
         # Initialise the GUI
         self.initUI()
